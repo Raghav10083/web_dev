@@ -197,7 +197,7 @@
     </section>
 
     <!-- About Section -->
-    <section class="about-section" id="about">
+    <section class="about-section reveal" id="about">
         <div class="container grid-2">
             <div class="about-visual">
                 <div class="video-container" id="videoContainer">
@@ -244,7 +244,7 @@
     </section>
 
     <!-- Courses & Services Tabbed Section -->
-    <section class="courses-section" id="courses">
+    <section class="courses-section reveal" id="courses">
         <div class="container">
             <div class="section-header text-center">
                 <span class="section-tag">Programs Offered</span>
@@ -391,8 +391,84 @@
         </div>
     </section>
 
+    <!-- Interactive Course Builder & Calculator -->
+    <section class="calculator-section reveal" id="course-builder">
+        <div class="container max-w-800">
+            <div class="calculator-card" id="calcCard">
+                <div class="calculator-glow"></div>
+                <div class="section-header text-center">
+                    <span class="section-tag">Interactive Estimate</span>
+                    <h2>Study Pathway & Hours Calculator</h2>
+                    <p>Select your starting level, target level, and study pace to calculate your custom timeline.</p>
+                </div>
+                
+                <div class="calc-controls">
+                    <div class="calc-control-group">
+                        <label>Starting Level:</label>
+                        <div class="calc-level-selector" id="startLevelSel">
+                            <button class="level-btn active" data-val="0">A1</button>
+                            <button class="level-btn" data-val="1">A2</button>
+                            <button class="level-btn" data-val="2">B1</button>
+                        </div>
+                    </div>
+                    
+                    <div class="calc-control-group">
+                        <label>Target Level:</label>
+                        <div class="calc-level-selector" id="targetLevelSel">
+                            <button class="level-btn" data-val="1">A2</button>
+                            <button class="level-btn active" data-val="3">B2</button>
+                            <button class="level-btn" data-val="4">C1</button>
+                        </div>
+                    </div>
+
+                    <div class="calc-control-group">
+                        <label>Study Pace:</label>
+                        <div class="pace-selector" id="paceSel">
+                            <button class="pace-btn active" data-pace="intensive">
+                                <strong>Intensive Mode</strong>
+                                <span>3 hrs/day (Mon-Fri)</span>
+                            </button>
+                            <button class="pace-btn" data-pace="standard">
+                                <strong>Standard Mode</strong>
+                                <span>1.5 hrs/day (Mon-Fri)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-results-display">
+                    <div class="result-tile">
+                        <span class="tile-num" id="calcMonths">6</span>
+                        <span class="tile-lbl">Est. Calendar Months</span>
+                    </div>
+                    <div class="result-tile">
+                        <span class="tile-num" id="calcHours">360</span>
+                        <span class="tile-lbl">Total Study Hours</span>
+                    </div>
+                    <div class="result-tile">
+                        <span class="tile-num" id="calcConfidence">98%</span>
+                        <span class="tile-lbl">telc Pass Rate</span>
+                    </div>
+                </div>
+
+                <div class="calc-timeline-progress">
+                    <div class="progress-labels">
+                        <span>A1</span>
+                        <span>A2</span>
+                        <span>B1</span>
+                        <span>B2</span>
+                        <span>C1</span>
+                    </div>
+                    <div class="timeline-bar-bg">
+                        <div class="timeline-bar-fill" id="timelineBarFill" style="width: 75%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- German Level Placement Quiz -->
-    <section class="quiz-section" id="placement-quiz">
+    <section class="quiz-section reveal" id="placement-quiz">
         <div class="container max-w-800">
             <div class="quiz-card" id="quizCard">
                 <div class="quiz-glow"></div>
@@ -504,8 +580,56 @@
         </div>
     </section>
 
+    <!-- Interactive German Vocabulary Minigame -->
+    <section class="game-section reveal" id="vocab-game">
+        <div class="container max-w-800">
+            <div class="game-card" id="gameCard">
+                <div class="game-glow"></div>
+                <div class="game-header text-center">
+                    <span class="game-badge">Interactive Challenge</span>
+                    <h2>Test Your German Vocab</h2>
+                    <p>Match the German word to its correct English translation. Earn your skill rank!</p>
+                </div>
+
+                <div class="game-stats-row">
+                    <div class="game-stat">Score: <span id="gameScore">0</span></div>
+                    <div class="game-stat">Question: <span id="gameCurrentQ">1</span>/5</div>
+                </div>
+
+                <div class="game-play-area">
+                    <div class="vocab-card" id="vocabWordCard">
+                        <span class="german-word" id="gameGermanWord">Sprechen</span>
+                        <span class="word-subtitle">What does this mean?</span>
+                    </div>
+
+                    <div class="game-choices-grid" id="gameChoicesGrid">
+                        <button class="choice-btn">To Speak</button>
+                        <button class="choice-btn">To Listen</button>
+                        <button class="choice-btn">To Write</button>
+                        <button class="choice-btn">To Read</button>
+                    </div>
+                </div>
+
+                <div class="game-feedback" id="gameFeedback">
+                    <span id="gameFeedbackText">Select the correct choice!</span>
+                </div>
+
+                <!-- Game Result Overlay (Inside card) -->
+                <div class="game-result-overlay" id="gameResultOverlay">
+                    <div class="overlay-content">
+                        <div class="award-icon"><i class="fa-solid fa-trophy"></i></div>
+                        <h3>Challenge Complete!</h3>
+                        <p class="final-score-txt">Your Score: <span id="gameFinalScore">0</span> / 50</p>
+                        <p class="final-rank-txt">German Skill Rank: <span id="gameFinalRank" class="highlight">A1 Beginner</span></p>
+                        <button class="cta-btn btn-primary" id="gameRestartBtn">Play Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Resources Section (Brochure Download) -->
-    <section class="resources-section" id="resources">
+    <section class="resources-section reveal" id="resources">
         <div class="container">
             <div class="section-header text-center">
                 <span class="section-tag">Student Resources</span>
@@ -552,7 +676,7 @@
     </section>
 
     <!-- Why Choose Us -->
-    <section class="why-us-section" id="whyUs">
+    <section class="why-us-section reveal" id="whyUs">
         <div class="why-us-glow"></div>
         <div class="container">
             <div class="section-header text-center">
@@ -587,7 +711,7 @@
     </section>
 
     <!-- Testimonials -->
-    <section class="testimonials-section" id="testimonials">
+    <section class="testimonials-section reveal" id="testimonials">
         <div class="container">
             <div class="section-header text-center">
                 <span class="section-tag">Success Stories</span>
@@ -681,7 +805,7 @@
     </section>
 
     <!-- FAQs Section -->
-    <section class="faq-section" id="faqs">
+    <section class="faq-section reveal" id="faqs">
         <div class="container max-w-800">
             <div class="section-header text-center">
                 <span class="section-tag">Frequently Asked Questions</span>
@@ -733,7 +857,7 @@
     </section>
 
     <!-- Contact & Consultation Form -->
-    <section class="contact-section" id="contact">
+    <section class="contact-section reveal" id="contact">
         <div class="container grid-2">
             <!-- Contact Details -->
             <div class="contact-info-card" id="contactInfoCard">

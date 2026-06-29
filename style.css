@@ -2199,12 +2199,446 @@ body.dark-mode .map-mock-bg {
         grid-template-columns: 1fr;
     }
     
-    .resource-card {
-        flex-direction: column;
-    }
-    
     .resource-preview-box {
         width: 100%;
         height: 180px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Reveal On Scroll Animations
+   -------------------------------------------------------------------------- */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   Interactive Course Builder & Calculator Section
+   -------------------------------------------------------------------------- */
+.calculator-section {
+    padding: 100px 0;
+}
+
+.calculator-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.calculator-glow {
+    position: absolute;
+    top: -40%;
+    left: -40%;
+    width: 180%;
+    height: 180%;
+    background: radial-gradient(circle, rgba(217, 119, 6, 0.03) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.calc-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin: 36px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.calc-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.calc-control-group label {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.calc-level-selector {
+    display: flex;
+    gap: 12px;
+}
+
+.calc-level-selector .level-btn {
+    flex: 1;
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.calc-level-selector .level-btn:hover {
+    border-color: var(--brand-color);
+    transform: translateY(-2px);
+}
+
+.calc-level-selector .level-btn.active {
+    background-color: var(--brand-color);
+    color: white;
+    border-color: var(--brand-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.calc-level-selector .level-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pace-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.pace-btn {
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--primary-color);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    transition: all var(--transition-normal);
+}
+
+.pace-btn strong {
+    font-family: var(--font-heading);
+    font-size: 15px;
+}
+
+.pace-btn span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.pace-btn:hover {
+    border-color: var(--brand-color);
+    transform: translateY(-2px);
+}
+
+.pace-btn.active {
+    background-color: var(--brand-light);
+    border-color: var(--brand-color);
+    color: var(--brand-color);
+}
+
+.calc-results-display {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 2;
+}
+
+.result-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.tile-num {
+    font-family: var(--font-heading);
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary-color);
+    transition: all 0.4s ease;
+}
+
+.tile-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.calc-timeline-progress {
+    position: relative;
+    z-index: 2;
+    margin-top: 24px;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    padding: 0 4px;
+}
+
+.timeline-bar-bg {
+    height: 10px;
+    background-color: var(--border-color);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.timeline-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand-color), var(--accent-color));
+    border-radius: var(--radius-full);
+    transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   Vocabulary Game Section
+   -------------------------------------------------------------------------- */
+.game-section {
+    padding: 100px 0;
+}
+
+.game-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.game-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.02) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.game-badge {
+    background-color: var(--accent-light);
+    color: var(--accent-color);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.game-stats-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 24px 0 32px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    position: relative;
+    z-index: 2;
+}
+
+.game-play-area {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    position: relative;
+    z-index: 2;
+}
+
+.vocab-card {
+    background-color: var(--bg-color);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 40px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+}
+
+.vocab-card.shake {
+    animation: shake 0.5s ease-in-out;
+    border-color: var(--danger-color);
+}
+
+.vocab-card.pulse {
+    animation: pulse 0.5s ease-in-out;
+    border-color: var(--brand-color);
+}
+
+.german-word {
+    font-family: var(--font-heading);
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--brand-color);
+    letter-spacing: -0.5px;
+}
+
+.word-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.game-choices-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.choice-btn {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary-color);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 16px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.choice-btn:hover {
+    border-color: var(--brand-color);
+    background-color: var(--brand-light);
+    color: var(--brand-color);
+    transform: translateY(-2px);
+}
+
+.choice-btn.correct {
+    background-color: var(--brand-color) !important;
+    color: white !important;
+    border-color: var(--brand-color) !important;
+}
+
+.choice-btn.wrong {
+    background-color: var(--danger-color) !important;
+    color: white !important;
+    border-color: var(--danger-color) !important;
+}
+
+.game-feedback {
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-top: 24px;
+    min-height: 24px;
+    position: relative;
+    z-index: 2;
+}
+
+.game-feedback.correct-text {
+    color: var(--brand-color) !important;
+}
+
+.game-feedback.wrong-text {
+    color: var(--danger-color) !important;
+}
+
+/* Game Results Overlay */
+.game-result-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-card);
+    display: none; /* Controlled by JS */
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.game-result-overlay.active {
+    display: flex;
+    animation: fadeIn var(--transition-normal);
+}
+
+.overlay-content {
+    text-align: center;
+    max-width: 400px;
+    padding: 24px;
+}
+
+.award-icon {
+    font-size: 64px;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+.final-score-txt {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 12px 0 8px;
+}
+
+.final-rank-txt {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+}
+
+/* Animations keyframes */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-15px); }
+    60% { transform: translateY(-8px); }
+}
+
+@media (max-width: 768px) {
+    .pace-selector {
+        grid-template-columns: 1fr;
+    }
+    
+    .game-choices-grid {
+        grid-template-columns: 1fr;
     }
 }

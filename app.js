@@ -576,6 +576,250 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
+    });
+
+    /* --------------------------------------------------------------------------
+       13. Scroll Reveal System (IntersectionObserver)
+       -------------------------------------------------------------------------- */
+    const revealElements = document.querySelectorAll('.reveal');
+    
+    if (revealElements.length > 0) {
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Reveal once
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: "0px 0px -50px 0px"
+        });
+        
+        revealElements.forEach(el => revealObserver.observe(el));
+    }
+
+    /* --------------------------------------------------------------------------
+       14. Interactive Course Pathway & Hours Calculator
+       -------------------------------------------------------------------------- */
+    const startLevelBtns = document.querySelectorAll('#startLevelSel .level-btn');
+    const targetLevelBtns = document.querySelectorAll('#targetLevelSel .level-btn');
+    const paceBtns = document.querySelectorAll('#paceSel .pace-btn');
+    
+    const calcMonths = document.getElementById('calcMonths');
+    const calcHours = document.getElementById('calcHours');
+    const calcConfidence = document.getElementById('calcConfidence');
+    const timelineBarFill = document.getElementById('timelineBarFill');
+
+    let startVal = 0; // A1
+    let targetVal = 3; // B2
+    let paceMode = 'intensive'; // intensive or standard
+
+    const levelMetrics = [
+        { name: 'A1', duration: 2, hours: 120 },
+        { name: 'A2', duration: 2, hours: 120 },
+        { name: 'B1', duration: 2.5, hours: 150 },
+        { name: 'B2', duration: 2.5, hours: 150 },
+        { name: 'C1', duration: 3, hours: 180 }
+    ];
+
+    function updateCalculator() {
+        // Enforce target > start
+        targetLevelBtns.forEach(btn => {
+            const btnVal = parseInt(btn.getAttribute('data-val'));
+            if (btnVal <= startVal) {
+                btn.setAttribute('disabled', 'true');
+                if (btnVal === targetVal) {
+                    // Shift target to start + 1
+                    targetVal = startVal + 1;
+                    targetLevelBtns.forEach(b => b.classList.remove('active'));
+                    const nextActive = Array.from(targetLevelBtns).find(b => parseInt(b.getAttribute('data-val')) === targetVal);
+                    if (nextActive) nextActive.classList.add('active');
+                }
+            } else {
+                btn.removeAttribute('disabled');
+            }
+        });
+
+        // Sum up metrics
+        let totalMonths = 0;
+        let totalHours = 0;
+
+        for (let i = startVal; i < targetVal; i++) {
+            totalMonths += levelMetrics[i + 1].duration;
+            totalHours += levelMetrics[i + 1].hours;
+        }
+
+        // Adjust based on pace
+        if (paceMode === 'intensive') {
+            totalMonths = Math.round((totalMonths * 0.7) * 10) / 10; // 30% faster calendar duration
+        } else {
+            totalMonths = totalMonths * 1.5; // Standard mode takes 50% longer calendar duration due to half daily hours
+        }
+
+        // Update UI
+        calcMonths.textContent = totalMonths;
+        calcHours.textContent = totalHours;
+        
+        // Pass probability indicator
+        let passProb = 98 - (targetVal - startVal) * 2;
+        if (paceMode === 'standard') passProb += 1; // Standard mode has slightly higher pass probability
+        calcConfidence.textContent = `${Math.min(99, passProb)}%`;
+
+        // Update progress bar width
+        const totalPossible = 4; // Max is C1 (index 4)
+        const progressPercentage = (targetVal / totalPossible) * 100;
+        timelineBarFill.style.width = `${progressPercentage}%`;
+    }
+
+    // Event listeners
+    startLevelBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            startLevelBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            startVal = parseInt(btn.getAttribute('data-val'));
+            updateCalculator();
         });
     });
+
+    targetLevelBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            targetLevelBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            targetVal = parseInt(btn.getAttribute('data-val'));
+            updateCalculator();
+        });
+    });
+
+    paceBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            paceBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            paceMode = btn.getAttribute('data-pace');
+            updateCalculator();
+        });
+    });
+
+    // Initialize Calculator
+    if (calcMonths) {
+        updateCalculator();
+    }
+
+    /* --------------------------------------------------------------------------
+       15. Interactive German Vocabulary Minigame
+       -------------------------------------------------------------------------- */
+    const gameQuestions = [
+        { q: "Sprechen", a: ["To Speak", "To Listen", "To Write", "To Read"], c: 0 },
+        { q: "Buch", a: ["Bed", "Book", "Bread", "Backpack"], c: 1 },
+        { q: "Morgen", a: ["Night", "Evening", "Morning", "Afternoon"], c: 2 },
+        { q: "Lernen", a: ["To Play", "To Run", "To Sleep", "To Learn"], c: 3 },
+        { q: "Freund", a: ["Friend", "Family", "Foreigner", "Father"], c: 0 }
+    ];
+
+    let gameIndex = 0;
+    let gameScore = 0;
+    let gameAnswered = false;
+
+    const gameWordEl = document.getElementById('gameGermanWord');
+    const gameChoicesGrid = document.getElementById('gameChoicesGrid');
+    const gameScoreEl = document.getElementById('gameScore');
+    const gameCurrentQEl = document.getElementById('gameCurrentQ');
+    const gameFeedbackEl = document.getElementById('gameFeedback');
+    const gameFeedbackText = document.getElementById('gameFeedbackText');
+    const gameResultOverlay = document.getElementById('gameResultOverlay');
+    const gameFinalScoreEl = document.getElementById('gameFinalScore');
+    const gameFinalRankEl = document.getElementById('gameFinalRank');
+    const gameRestartBtn = document.getElementById('gameRestartBtn');
+    const vocabWordCard = document.getElementById('vocabWordCard');
+
+    function loadGameQuestion() {
+        if (!gameWordEl) return;
+        
+        gameAnswered = false;
+        vocabWordCard.className = "vocab-card"; // Reset animation classes
+        gameFeedbackEl.className = "game-feedback";
+        gameFeedbackText.textContent = "Select the correct choice!";
+        
+        const q = gameQuestions[gameIndex];
+        gameWordEl.textContent = q.q;
+        gameCurrentQEl.textContent = gameIndex + 1;
+        
+        // Generate buttons
+        gameChoicesGrid.innerHTML = '';
+        q.a.forEach((choice, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.textContent = choice;
+            btn.addEventListener('click', () => handleGameChoice(idx, btn));
+            gameChoicesGrid.appendChild(btn);
+        });
+    }
+
+    function handleGameChoice(choiceIdx, btn) {
+        if (gameAnswered) return;
+        gameAnswered = true;
+        
+        const q = gameQuestions[gameIndex];
+        const choiceBtns = gameChoicesGrid.querySelectorAll('.choice-btn');
+        
+        if (choiceIdx === q.c) {
+            // Correct Choice
+            gameScore += 10;
+            gameScoreEl.textContent = gameScore;
+            btn.classList.add('correct');
+            vocabWordCard.classList.add('pulse');
+            gameFeedbackEl.classList.add('correct-text');
+            gameFeedbackText.innerHTML = '<i class="fa-solid fa-circle-check"></i> Correct! +10 pts';
+        } else {
+            // Wrong Choice
+            btn.classList.add('wrong');
+            choiceBtns[q.c].classList.add('correct'); // Highlight correct choice
+            vocabWordCard.classList.add('shake');
+            gameFeedbackEl.classList.add('wrong-text');
+            gameFeedbackText.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Incorrect! Correct answer was "${q.a[q.c]}"`;
+        }
+
+        // Delay next question
+        setTimeout(() => {
+            if (gameIndex < gameQuestions.length - 1) {
+                gameIndex++;
+                loadGameQuestion();
+            } else {
+                showGameResults();
+            }
+        }, 2200);
+    }
+
+    function showGameResults() {
+        gameFinalScoreEl.textContent = gameScore;
+        
+        let rank = '';
+        if (gameScore >= 50) {
+            rank = 'B2 Upper-Intermediate 🇩🇪';
+        } else if (gameScore >= 30) {
+            rank = 'B1 Intermediate 📈';
+        } else if (gameScore >= 10) {
+            rank = 'A2 Elementary 📚';
+        } else {
+            rank = 'A1 Absolute Beginner 🎓';
+        }
+        
+        gameFinalRankEl.textContent = rank;
+        gameResultOverlay.classList.add('active');
+    }
+
+    if (gameRestartBtn) {
+        gameRestartBtn.addEventListener('click', () => {
+            gameIndex = 0;
+            gameScore = 0;
+            gameScoreEl.textContent = "0";
+            gameResultOverlay.classList.remove('active');
+            loadGameQuestion();
+        });
+    }
+
+    // Initialize Game
+    if (gameWordEl) {
+        loadGameQuestion();
+    }
 });
