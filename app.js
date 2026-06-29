@@ -580,24 +580,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* --------------------------------------------------------------------------
-       13. Scroll Reveal System (IntersectionObserver)
+       13. Scroll Reveal System (Robust Scroll Event Listener)
        -------------------------------------------------------------------------- */
     const revealElements = document.querySelectorAll('.reveal');
     
-    if (revealElements.length > 0) {
-        const revealObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                    observer.unobserve(entry.target); // Reveal once
-                }
-            });
-        }, {
-            threshold: 0.15,
-            rootMargin: "0px 0px -50px 0px"
+    function revealOnScroll() {
+        const windowHeight = window.innerHeight;
+        revealElements.forEach(el => {
+            const elementTop = el.getBoundingClientRect().top;
+            const elementVisible = 80; // Trigger when 80px of element is visible in viewport
+            if (elementTop < windowHeight - elementVisible) {
+                el.classList.add('active');
+            }
         });
-        
-        revealElements.forEach(el => revealObserver.observe(el));
+    }
+
+    if (revealElements.length > 0) {
+        window.addEventListener('scroll', revealOnScroll);
+        // Trigger once immediately to reveal elements visible at start
+        setTimeout(revealOnScroll, 100);
     }
 
     /* --------------------------------------------------------------------------
