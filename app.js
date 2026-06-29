@@ -824,4 +824,146 @@ document.addEventListener('DOMContentLoaded', () => {
     if (gameWordEl) {
         loadGameQuestion();
     }
+
+    /* --------------------------------------------------------------------------
+       16. Interactive Background Canvas Particle System
+       -------------------------------------------------------------------------- */
+    const canvas = document.getElementById('bgCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const maxParticles = 45;
+        
+        let mouse = { x: null, y: null, radius: 150 };
+        
+        // Track mouse movement
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        
+        // Clear mouse when leaving window
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        // Resize Canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 4 + 1;
+                this.speedX = Math.random() * 0.4 - 0.2;
+                this.speedY = Math.random() * 0.4 - 0.2;
+                this.baseOpacity = Math.random() * 0.2 + 0.05;
+                this.opacity = this.baseOpacity;
+            }
+            
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                // Wrap around edges
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+                
+                // Mouse Interaction (Push particles away)
+                if (mouse.x !== null && mouse.y !== null) {
+                    let dx = this.x - mouse.x;
+                    let dy = this.y - mouse.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < mouse.radius) {
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        let angle = Math.atan2(dy, dx);
+                        
+                        this.x += Math.cos(angle) * force * 2;
+                        this.y += Math.sin(angle) * force * 2;
+                        this.opacity = Math.min(0.5, this.baseOpacity + force * 0.3);
+                    } else {
+                        // Return to base opacity slowly
+                        if (this.opacity > this.baseOpacity) {
+                            this.opacity -= 0.01;
+                        }
+                    }
+                } else {
+                    if (this.opacity > this.baseOpacity) {
+                        this.opacity -= 0.01;
+                    }
+                }
+            }
+            
+            draw() {
+                // Adapt particle colors to Light/Dark Mode
+                const isDark = document.body.classList.contains('dark-mode');
+                ctx.fillStyle = isDark 
+                    ? `rgba(255, 255, 255, ${this.opacity})` 
+                    : `rgba(15, 23, 42, ${this.opacity})`;
+                    
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < maxParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
+            // Draw connections
+            const isDark = document.body.classList.contains('dark-mode');
+            const connectionColor = isDark ? 255 : 15;
+            
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a + 1; b < particles.length; b++) {
+                    let dx = particles[a].x - particles[b].x;
+                    let dy = particles[a].y - particles[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 110) {
+                        let opacity = (110 - distance) / 110 * 0.06;
+                        ctx.strokeStyle = `rgba(${connectionColor}, ${connectionColor}, ${connectionColor}, ${opacity})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initParticles();
+        animate();
+    }
 });
