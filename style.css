@@ -799,7 +799,7 @@ body.dark-mode .floating-glass-card {
     color: var(--text-muted);
 }
 
-/* Campus Video Container */
+/* Campus Video Container & Placeholder */
 .video-container {
     position: relative;
     border-radius: var(--radius-lg);
@@ -809,11 +809,20 @@ body.dark-mode .floating-glass-card {
     aspect-ratio: 16/9;
 }
 
-.campus-video {
+.video-placeholder-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    display: block;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.65);
+    transition: transform var(--transition-slow);
+}
+
+.video-container:hover .video-placeholder-bg {
+    transform: scale(1.04);
 }
 
 .video-overlay {
@@ -822,19 +831,15 @@ body.dark-mode .floating-glass-card {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(15, 23, 42, 0.4);
+    background-color: rgba(15, 23, 42, 0.35);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 16px;
     cursor: pointer;
-    transition: opacity var(--transition-normal);
-}
-
-.video-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
+    transition: all var(--transition-normal);
+    z-index: 2;
 }
 
 .play-btn {

@@ -132,23 +132,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3000);
 
     /* --------------------------------------------------------------------------
-       6. Campus Video Custom Playback Controls
+       6. Campus Video Custom Playback Controls (Placeholder)
        -------------------------------------------------------------------------- */
     const videoOverlay = document.getElementById('videoOverlay');
-    const campusVideo = document.getElementById('campusVideo');
 
-    if (videoOverlay && campusVideo) {
+    if (videoOverlay) {
         videoOverlay.addEventListener('click', () => {
-            videoOverlay.classList.add('hidden');
-            campusVideo.play();
-        });
-
-        campusVideo.addEventListener('pause', () => {
-            videoOverlay.classList.remove('hidden');
-        });
-
-        campusVideo.addEventListener('ended', () => {
-            videoOverlay.classList.remove('hidden');
+            alert("🎥 Campus Video Tour Coming Soon!\n\nWe are currently preparing a brand new High-Definition tour of our Sector 36-D, Chandigarh center. Stay tuned!");
         });
     }
 
