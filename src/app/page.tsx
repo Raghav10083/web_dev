@@ -7,7 +7,7 @@ import ParticleNetwork from "@/components/ParticleNetwork";
 import InteractiveGlobe from "@/components/InteractiveGlobe";
 import EcosystemGraph from "@/components/EcosystemGraph";
 import ConstitutionShowcase from "@/components/ConstitutionShowcase";
-import HeroAnimation from "@/components/HeroAnimation";
+import OwlCanvas from "@/components/OwlCanvas";
 import SmoothScroll from "@/components/SmoothScroll";
 import { FiArrowRight, FiCalendar, FiDownload, FiCheckCircle } from "react-icons/fi";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -169,8 +169,10 @@ export default function Home() {
           
           <div className="max-w-7xl mx-auto px-6 z-10 text-center flex flex-col items-center justify-center relative">
             
-            {/* Cinematic SVG Path-drawing Timeline animation */}
-            <HeroAnimation />
+            {/* Real-time Cinematic particle Owl convergence and neural network canvas */}
+            <div className="w-full max-w-5xl mx-auto h-[320px] sm:h-[450px] relative overflow-hidden bg-[#030303]/20 border border-gray-900/40 rounded-3xl p-6 flex items-center justify-center">
+              <OwlCanvas />
+            </div>
 
             {/* Timeless Titles */}
             <motion.div
