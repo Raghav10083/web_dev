@@ -7,34 +7,34 @@ import ParticleNetwork from "@/components/ParticleNetwork";
 import InteractiveGlobe from "@/components/InteractiveGlobe";
 import EcosystemGraph from "@/components/EcosystemGraph";
 import ConstitutionShowcase from "@/components/ConstitutionShowcase";
+import HeroAnimation from "@/components/HeroAnimation";
 import SmoothScroll from "@/components/SmoothScroll";
-import { FiArrowRight, FiSearch, FiClock, FiCalendar, FiDownload, FiMapPin, FiMail, FiCheckCircle } from "react-icons/fi";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { FiArrowRight, FiCalendar, FiDownload, FiCheckCircle } from "react-icons/fi";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const [activeCapitalTab, setActiveCapitalTab] = useState<"clients" | "lawfirms" | "investors">("clients");
   const [researchFilter, setResearchFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "Membership Application", message: "" });
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [evalSubmitted, setEvalSubmitted] = useState(false);
 
-  // Parallax mouse movement tracking
+  // Parallax mouse coordinates
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePos({
-        x: (e.clientX - window.innerWidth / 2) * 0.05,
-        y: (e.clientY - window.innerHeight / 2) * 0.05,
+        x: (e.clientX - window.innerWidth / 2) * 0.04,
+        y: (e.clientY - window.innerHeight / 2) * 0.04,
       });
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  // Scroll ref for storytelling triggers
+  // Scroll storytelling refs
   const owlContainerRef = useRef<HTMLDivElement>(null);
   const tigerContainerRef = useRef<HTMLDivElement>(null);
+  const philosophyContainerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress: owlScroll } = useScroll({
     target: owlContainerRef,
@@ -46,16 +46,23 @@ export default function Home() {
     offset: ["start end", "end start"],
   });
 
-  // Map scroll states to active concepts
-  const activeOwlIndex = useTransform(owlScroll, [0.15, 0.35, 0.55, 0.75, 0.95], [0, 1, 2, 3, 4]);
-  const activeTigerIndex = useTransform(tigerScroll, [0.12, 0.28, 0.44, 0.6, 0.76, 0.92], [0, 1, 2, 3, 4, 5]);
+  const { scrollYProgress: philosophyScroll } = useScroll({
+    target: philosophyContainerRef,
+    offset: ["start end", "end start"],
+  });
+
+  // Storytelling scroll indexes mapping
+  const activeOwlIndex = useTransform(owlScroll, [0.1, 0.28, 0.46, 0.64, 0.82, 0.95], [0, 1, 2, 3, 4, 5]);
+  const activeTigerIndex = useTransform(tigerScroll, [0.1, 0.26, 0.42, 0.58, 0.74, 0.9], [0, 1, 2, 3, 4, 5]);
+  const philosophyStage = useTransform(philosophyScroll, [0.1, 0.3, 0.5, 0.7, 0.9], [0, 1, 2, 3, 4]);
 
   const [owlIdx, setOwlIdx] = useState(0);
   const [tigerIdx, setTigerIdx] = useState(0);
+  const [philoIdx, setPhiloIdx] = useState(0);
 
   useEffect(() => {
     return activeOwlIndex.on("change", (latest) => {
-      setOwlIdx(Math.min(4, Math.max(0, Math.floor(latest))));
+      setOwlIdx(Math.min(5, Math.max(0, Math.floor(latest))));
     });
   }, [activeOwlIndex]);
 
@@ -65,21 +72,28 @@ export default function Home() {
     });
   }, [activeTigerIndex]);
 
-  const owlConcepts = [
-    { title: "Knowledge", desc: "The foundational catalyst creating opportunities across law, finance, and technology." },
-    { title: "Innovation", desc: "Translating static ideas into active frameworks, advancing systems for modern industries." },
-    { title: "Research", desc: "Disciplined inquiry under WOBT Councils yielding peer-reviewed journals and policies." },
-    { title: "Technology", desc: "Deploying secure, isolated systems like LexAI and LawBox chain of custody." },
-    { title: "Leadership", desc: "Intellectual capital guiding businesses, secretariats, and academic chapters." },
+  useEffect(() => {
+    return philosophyStage.on("change", (latest) => {
+      setPhiloIdx(Math.min(4, Math.max(0, Math.floor(latest))));
+    });
+  }, [philosophyStage]);
+
+  const owlStory = [
+    { word: "WISDOM", title: "Lakshmi & Foresight", desc: "The White Owl derives its inspiration from the vahana of Goddess Lakshmi, symbolising prosperity, abundance, and good fortune in Indian tradition. Across the world, the owl has long represented wisdom, intelligence, knowledge, foresight, and the ability to see opportunities beyond the obvious." },
+    { word: "KNOWLEDGE", title: "Intellectual Capital", desc: "Within WOBT, the White Owl represents intellectual capital. It symbolises researchers, innovators, entrepreneurs, technologists, scientists, financial experts, strategists, educators, consultants, investors, business leaders, and every professional whose knowledge creates value." },
+    { word: "INNOVATION", title: "Continuous Progress", desc: "The White Owl represents curiosity, learning, innovation, and the continuous pursuit of excellence." },
+    { word: "RESEARCH", title: "Disciplined Analysis", desc: "Driving thorough inquiry and structured evaluations under dedicated Academic and Research Councils." },
+    { word: "TECHNOLOGY", title: "Deploying Frameworks", desc: "Deploying secure, isolated, and cryptographic platforms like LexAI and LawBox chain of custody." },
+    { word: "LEADERSHIP", title: "Intellectual Guidance", desc: "Empelling multidisciplinary leaders to guide corporate chapters, boards, and public policy paths." },
   ];
 
-  const tigerConcepts = [
-    { title: "Justice", desc: "The primary commitment to uphold ethics, governance, mediation, and risk oversight." },
-    { title: "Governance", desc: "Enforcing statutory compliance, DPDP Act guidelines, and BCI criteria." },
-    { title: "Leadership", desc: "Decisive execution driving complex resolutions and institutional management." },
-    { title: "Protection", desc: "Managing commercial dispute risks and safeguarding organizational assets." },
-    { title: "Responsibility", desc: "Ethical accountability mapped to WOBT's constitutional councils." },
-    { title: "Execution", desc: "Non-recourse litigation funding and strategic restructures resolved in days." },
+  const tigerStory = [
+    { word: "JUSTICE", title: "Ethics & Governance", desc: "Its black colour reflects professionalism, integrity, and the commitment to uphold justice, ethics, governance, and accountability." },
+    { word: "LEADERSHIP", title: "Decisive Action", desc: "The Black Tiger represents courage, leadership, discipline, resilience, responsibility, and decisive execution." },
+    { word: "PROTECTION", title: "Managing Risks", desc: "While inspired by the black attire traditionally associated with the legal profession, the Black Tiger represents a much broader philosophy — protecting institutions, managing risk, resolving disputes, and enforcing standards." },
+    { word: "EXECUTION", title: "Fulfilling Objectives", desc: "Direct litigation funding, asset restructurings, and complex neutral resolutions resolved in days, not months." },
+    { word: "GOVERNANCE", title: "Accountability Panels", desc: "Across the WOBT ecosystem, this spirit is reflected in advocates, compliance professionals, corporate leaders, risk advisors, and public servants." },
+    { word: "RESPONSIBILITY", title: "Societal Integrity", desc: "Fostering absolute commitment to defend rights, organizations, and the global professional community." },
   ];
 
   const liveBrands = [
@@ -150,233 +164,222 @@ export default function Home() {
         <Navbar />
 
         {/* Cinematic Hero */}
-        <section className="relative min-h-screen flex items-center justify-center pt-28 pb-12 overflow-hidden bg-[#030303]">
+        <section className="relative min-h-screen flex flex-col items-center justify-center pt-32 pb-16 overflow-hidden bg-[#030303]">
           <ParticleNetwork />
           
-          {/* Ambient Gold Rays */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] gold-glow-radial pointer-events-none opacity-60" />
+          <div className="max-w-7xl mx-auto px-6 z-10 text-center flex flex-col items-center justify-center relative">
+            
+            {/* Cinematic SVG Path-drawing Timeline animation */}
+            <HeroAnimation />
 
-          {/* Mouse follow parallax container */}
-          <motion.div
-            style={{ x: mousePos.x, y: mousePos.y }}
-            className="max-w-7xl mx-auto px-6 z-10 text-center flex flex-col items-center justify-center transition-all duration-300 ease-out"
-          >
-            {/* Soft gold pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C8A34A08] border border-[#C8A34A26] text-[#C8A34A] text-xs font-semibold tracking-widest uppercase mb-8 select-none shadow-[0_0_15px_rgba(200,163,74,0.03)] animate-pulse">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C8A34A]" />
-              GLOBAL MULTIDISCIPLINARY PROFESSIONAL INSTITUTION
-            </div>
-
-            {/* Giant Title */}
-            <h1 className="font-serif text-4xl sm:text-6xl md:text-8xl text-white font-extrabold tracking-wider leading-[1.1] mb-6">
-              WHITE OWLS &amp;<br />
-              <span className="gold-text-gradient">BLACK TIGERS</span>
-            </h1>
-
-            {/* Timeless Subtitles */}
-            <p className="text-gray-300 text-sm sm:text-lg font-medium tracking-wide max-w-2xl mb-8 leading-relaxed">
-              Where Wisdom Meets Courage. Where Professionals Shape the Future.
-              <br />
-              <span className="text-[#C8A34A] font-serif tracking-widest text-xs uppercase block mt-3 font-semibold">
-                Wisdom to Imagine. Courage to Execute. Excellence to Transform.
+            {/* Timeless Titles */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 10.5, duration: 1.5 }}
+              className="flex flex-col items-center mt-12"
+            >
+              <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest mb-4">
+                White Owls &amp; Black Tigers
               </span>
-            </p>
+              <h2 className="font-serif text-3xl sm:text-5xl md:text-6xl text-white font-extrabold tracking-wider leading-tight max-w-4xl mb-6">
+                Where Wisdom Meets Courage.<br />
+                Where Professionals Shape the Future.
+              </h2>
+              <p className="text-gray-400 text-xs sm:text-sm font-medium tracking-widest uppercase mb-10 max-w-2xl">
+                Wisdom to Imagine. Courage to Execute. Excellence to Transform.
+              </p>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-16 justify-center">
-              <a
-                href="#ecosystem"
-                className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider text-[#090909] bg-[#C8A34A] hover:bg-white hover:text-[#090909] transition-all duration-300 shadow-[0_0_15px_rgba(200,163,74,0.3)]"
-              >
-                Explore the Ecosystem
-              </a>
-              <a
-                href="#membership"
-                className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider text-white border border-gray-700 hover:border-[#C8A34A] hover:text-[#C8A34A] transition-all duration-300 bg-transparent"
-              >
-                Become a Member
-              </a>
-            </div>
-
-            {/* Mini pillars */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-4xl border-t border-gray-900 pt-10 text-gray-500 text-[10px] font-semibold uppercase tracking-widest">
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-white font-serif tracking-wider">Knowledge</span>
-                <span className="text-[9px] text-gray-600 font-sans">Research &amp; AI</span>
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="#ecosystem"
+                  className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider text-[#090909] bg-[#C8A34A] hover:bg-white hover:text-[#090909] transition-all duration-300 shadow-[0_0_15px_rgba(200,163,74,0.3)] hover:scale-105"
+                >
+                  Explore the Ecosystem
+                </a>
+                <a
+                  href="#membership"
+                  className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider text-white border border-gray-800 hover:border-[#C8A34A] hover:text-[#C8A34A] transition-all duration-300 bg-transparent"
+                >
+                  Become a Member
+                </a>
               </div>
-              <div className="flex flex-col items-center gap-1 border-l border-gray-900/50">
-                <span className="text-white font-serif tracking-wider">Capital</span>
-                <span className="text-[9px] text-gray-600 font-sans">dispute finance</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 border-l border-gray-900/50">
-                <span className="text-white font-serif tracking-wider">Justice</span>
-                <span className="text-[9px] text-gray-600 font-sans">law &amp; governance</span>
-              </div>
-              <div className="flex flex-col items-center gap-1 border-l border-gray-900/50">
-                <span className="text-white font-serif tracking-wider">Society</span>
-                <span className="text-[9px] text-gray-600 font-sans">policy &amp; security</span>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </section>
 
         {/* About WOBT Narrative */}
-        <section id="about" className="py-32 relative bg-[#090909] border-t border-gray-950">
+        <section id="about" className="section-spacious relative bg-[#090909] border-t border-gray-950">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center max-w-3xl mx-auto mb-20">
+            <div className="text-center max-w-3xl mx-auto">
               <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest">
                 Our Genesis
               </span>
               <h2 className="font-serif text-3xl md:text-5xl text-white font-bold tracking-wide mt-2">
                 Every Enduring Institution Begins With An Idea
               </h2>
-              <div className="w-12 h-[1px] bg-[#C8A34A] mx-auto mt-6" />
-              <p className="text-xs text-gray-400 mt-6 leading-relaxed font-medium">
+              <div className="w-12 h-[1px] bg-[#C8A34A] mx-auto mt-6 mb-8" />
+              <p className="text-xs text-gray-400 leading-relaxed font-medium">
                 White Owls &amp; Black Tigers (WOBT) was founded on a simple belief: the world&apos;s greatest opportunities and most complex challenges can no longer be solved by a single profession. They require the collective intelligence of experts from diverse disciplines working together with a shared purpose.
               </p>
-              <p className="text-xs text-gray-400 mt-4 leading-relaxed font-medium">
+              <p className="text-xs text-gray-400 leading-relaxed font-medium">
                 WOBT is a global multidisciplinary professional ecosystem that brings together expertise across law, finance, technology, business, governance, research, academia, innovation, and public policy. Through its specialised platforms, WOBT enables professionals to collaborate, exchange knowledge, develop strategic relationships, create innovative solutions, and contribute to the advancement of industries and society.
+              </p>
+              <p className="text-xs text-gray-500 leading-relaxed italic">
+                Rather than being defined by any one profession, WOBT is defined by excellence, integrity, innovation, and collaboration.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Scroll Storytelling: The White Owl (Knowledge -> Innovation -> Research -> Technology -> Leadership) */}
-        <section ref={owlContainerRef} className="py-32 relative bg-[#030303]/40 border-t border-gray-950">
-          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+        {/* Scroll Storytelling: The White Owl (Wisdom -> Knowledge -> Innovation -> Research -> Technology -> Leadership) */}
+        <section ref={owlContainerRef} className="section-spacious relative bg-[#030303]/40 border-t border-gray-950">
+          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
             
-            {/* Storytelling Content Side */}
+            {/* Storytelling Static Base Panel */}
             <div className="flex flex-col justify-between p-8 lg:p-12 glass-gold rounded-3xl relative">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 gold-glow-radial pointer-events-none opacity-40" />
               <div>
                 <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest font-mono">
-                  The White Owl Concept Flow
+                  The White Owl
                 </span>
                 <h3 className="font-serif text-2xl lg:text-3xl text-white font-bold tracking-wide mt-4 mb-6">
                   Intellectual Capital
                 </h3>
-                <p className="text-xs text-gray-400 leading-relaxed mb-6 font-medium">
-                  The White Owl derives its inspiration from the <em>vahana</em> of Goddess Lakshmi, symbolising prosperity, abundance, and good fortune in Indian tradition. Across the world, the owl has long represented wisdom, intelligence, knowledge, foresight, and the ability to see opportunities beyond the obvious.
-                </p>
                 <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                  Within WOBT, the White Owl represents intellectual capital. It symbolises researchers, innovators, entrepreneurs, technologists, scientists, financial experts, strategists, educators, consultants, investors, business leaders, and every professional whose knowledge creates value, advances ideas, and drives progress.
+                  The White Owl represents intellectual capital. It symbolises researchers, innovators, entrepreneurs, technologists, scientists, financial experts, strategists, educators, consultants, investors, business leaders, and every professional whose knowledge creates value, advances ideas, and drives progress.
                 </p>
               </div>
-              <div className="mt-8 pt-6 border-t border-[#C8A34A12] text-xs text-gray-500">
-                <span>The White Owl represents curiosity, learning, innovation, and the continuous pursuit of excellence.</span>
+              <div className="mt-8 pt-6 border-t border-[#C8A34A12] text-xs text-gray-500 font-serif">
+                <span>Wisdom • Knowledge • Innovation • Research • Technology • Leadership</span>
               </div>
             </div>
 
-            {/* Scroll Animation Reveal Side */}
-            <div className="flex flex-col justify-center gap-6 relative">
-              <span className="text-[10px] text-gray-600 uppercase tracking-widest font-bold block mb-2 pl-4">
-                Scroll to Reveal Owl Attributes
+            {/* Scroll Reveal Sequential display panel */}
+            <div className="flex flex-col justify-center gap-4 relative">
+              <span className="text-[10px] text-gray-600 uppercase tracking-widest font-bold block mb-4 pl-2 font-mono">
+                Scroll to Transition Owl Attributes
               </span>
-              <div className="flex flex-col gap-3">
-                {owlConcepts.map((concept, idx) => {
-                  const isActive = owlIdx === idx;
-                  return (
-                    <div
-                      key={concept.title}
-                      className={`p-6 rounded-2xl border transition-all duration-500 text-left ${
-                        isActive
-                          ? "bg-[#C8A34A08] border-[#C8A34A33] shadow-[0_0_20px_rgba(200,163,74,0.05)]"
-                          : "bg-transparent border-transparent opacity-20"
-                      }`}
-                    >
-                      <h4 className="font-serif text-white font-bold text-sm tracking-wide group-hover:text-[#C8A34A] transition-colors">
-                        {concept.title}
-                      </h4>
-                      {isActive && (
-                        <p className="text-[11px] text-gray-400 leading-relaxed mt-2 font-medium">
-                          {concept.desc}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={owlIdx}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-8 rounded-2xl bg-[#090909]/80 border border-[#C8A34A26] shadow-lg flex flex-col gap-4 text-left"
+                >
+                  <span className="font-serif text-3xl font-bold tracking-widest gold-text-gradient">
+                    {owlStory[owlIdx].word}
+                  </span>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                    {owlStory[owlIdx].title}
+                  </span>
+                  <p className="text-xs text-gray-400 leading-relaxed font-medium mt-2">
+                    {owlStory[owlIdx].desc}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
+
           </div>
         </section>
 
-        {/* Scroll Storytelling: The Black Tiger (Justice -> Governance -> Leadership -> Protection -> Responsibility -> Execution) */}
-        <section ref={tigerContainerRef} className="py-32 relative bg-[#090909] border-t border-gray-950">
-          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+        {/* Scroll Storytelling: The Black Tiger (Justice -> Leadership -> Protection -> Execution -> Governance -> Responsibility) */}
+        <section ref={tigerContainerRef} className="section-spacious relative bg-[#090909] border-t border-gray-950">
+          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-stretch">
             
-            {/* Storytelling Content Side */}
+            {/* Storytelling Static Base Panel */}
             <div className="flex flex-col justify-between p-8 lg:p-12 glass rounded-3xl relative">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 gold-glow-radial pointer-events-none opacity-20" />
               <div>
                 <span className="text-gray-500 text-xs font-bold uppercase tracking-widest font-mono">
-                  The Black Tiger Concept Flow
+                  The Black Tiger
                 </span>
                 <h3 className="font-serif text-2xl lg:text-3xl text-white font-bold tracking-wide mt-4 mb-6">
                   Decisive Execution
                 </h3>
-                <p className="text-xs text-gray-400 leading-relaxed mb-6 font-medium">
+                <p className="text-xs text-gray-400 leading-relaxed font-medium">
                   The Black Tiger represents courage, leadership, discipline, resilience, responsibility, and decisive execution. Its black colour reflects professionalism, integrity, and the commitment to uphold justice, ethics, governance, and accountability.
                 </p>
-                <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                  While inspired by the black attire traditionally associated with the legal profession, the Black Tiger represents a much broader philosophy—protecting institutions, managing risk, resolving disputes, enforcing standards, and leading with conviction.
-                </p>
               </div>
-              <div className="mt-8 pt-6 border-t border-gray-900 text-xs text-gray-500">
-                <span>Across the WOBT ecosystem, this spirit is reflected in advocates, compliance professionals, corporate leaders, and investigators protecting rights.</span>
+              <div className="mt-8 pt-6 border-t border-gray-900 text-xs text-gray-500 font-serif">
+                <span>Justice • Leadership • Protection • Execution • Governance • Responsibility</span>
               </div>
             </div>
 
-            {/* Scroll Animation Reveal Side */}
-            <div className="flex flex-col justify-center gap-6 relative">
-              <span className="text-[10px] text-gray-600 uppercase tracking-widest font-bold block mb-2 pl-4">
-                Scroll to Reveal Tiger Attributes
+            {/* Scroll Reveal Sequential display panel */}
+            <div className="flex flex-col justify-center gap-4 relative">
+              <span className="text-[10px] text-gray-600 uppercase tracking-widest font-bold block mb-4 pl-2 font-mono">
+                Scroll to Transition Tiger Attributes
               </span>
-              <div className="flex flex-col gap-3">
-                {tigerConcepts.map((concept, idx) => {
-                  const isActive = tigerIdx === idx;
-                  return (
-                    <div
-                      key={concept.title}
-                      className={`p-5 rounded-2xl border transition-all duration-500 text-left ${
-                        isActive
-                          ? "bg-gray-950 border-gray-800 shadow-md"
-                          : "bg-transparent border-transparent opacity-20"
-                      }`}
-                    >
-                      <h4 className="font-serif text-white font-bold text-sm tracking-wide">
-                        {concept.title}
-                      </h4>
-                      {isActive && (
-                        <p className="text-[11px] text-gray-400 leading-relaxed mt-2 font-medium">
-                          {concept.desc}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={tigerIdx}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-8 rounded-2xl bg-gray-950 border border-gray-800 shadow-lg flex flex-col gap-4 text-left"
+                >
+                  <span className="font-serif text-3xl font-bold tracking-widest text-white">
+                    {tigerStory[tigerIdx].word}
+                  </span>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                    {tigerStory[tigerIdx].title}
+                  </span>
+                  <p className="text-xs text-gray-400 leading-relaxed mt-2 font-medium">
+                    {tigerStory[tigerIdx].desc}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
+
           </div>
         </section>
 
-        {/* Our Philosophy Center Banner */}
-        <section className="py-24 bg-[#030303]/40 border-t border-gray-950">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-4">
-              Our Philosophy
-            </span>
-            <p className="font-serif text-lg sm:text-2xl text-white leading-relaxed tracking-wide italic">
-              &ldquo;Knowledge creates opportunity. Courage transforms opportunity into achievement. The White Owl represents the ability to imagine, innovate, analyse, and create. The Black Tiger represents the ability to execute, protect, lead, and inspire confidence. Together, they define the philosophy of White Owls &amp; Black Tigers.&rdquo;
-            </p>
-            <div className="h-[1px] bg-gray-900 max-w-xs mx-auto my-6" />
-            <span className="text-[10px] text-[#C8A34A] tracking-wider uppercase font-semibold">
-              Sapientia et Fortitudo
+        {/* Scroll Storytelling Philosophy Banner */}
+        <section ref={philosophyContainerRef} className="section-spacious bg-[#030303]/40 border-t border-gray-950 relative overflow-hidden">
+          <div className="max-w-4xl mx-auto px-6 text-center h-[340px] flex flex-col justify-center items-center">
+            
+            <AnimatePresence mode="wait">
+              {philoIdx === 0 && (
+                <motion.h4 key="p0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="font-serif text-xl sm:text-3xl text-white font-bold leading-relaxed">
+                  &ldquo;Knowledge creates opportunity.&rdquo;
+                </motion.h4>
+              )}
+              {philoIdx === 1 && (
+                <motion.h4 key="p1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="font-serif text-xl sm:text-3xl text-white font-bold leading-relaxed">
+                  &ldquo;Courage transforms opportunity into achievement.&rdquo;
+                </motion.h4>
+              )}
+              {philoIdx === 2 && (
+                <motion.h4 key="p2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="font-serif text-xl sm:text-3xl text-gray-300 leading-relaxed font-medium">
+                  &ldquo;The White Owl represents the ability to imagine, innovate, analyse, and create.&rdquo;
+                </motion.h4>
+              )}
+              {philoIdx === 3 && (
+                <motion.h4 key="p3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="font-serif text-xl sm:text-3xl text-gray-300 leading-relaxed font-medium">
+                  &ldquo;The Black Tiger represents the ability to execute, protect, lead, and inspire confidence.&rdquo;
+                </motion.h4>
+              )}
+              {philoIdx === 4 && (
+                <motion.h4 key="p4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="font-serif text-xl sm:text-3xl text-white font-bold leading-relaxed">
+                  &ldquo;Together, they define the philosophy of White Owls &amp; Black Tigers.&rdquo;
+                </motion.h4>
+              )}
+            </AnimatePresence>
+
+            <div className="h-[1.5px] bg-[#C8A34A33] w-24 my-6" />
+            <span className="text-[10px] text-gray-500 uppercase tracking-widest font-mono font-bold block">
+              Scroll to progression
             </span>
           </div>
         </section>
 
-        {/* Interactive Ecosystem Graph Section */}
-        <section id="ecosystem" className="py-32 bg-[#090909] border-t border-gray-950 relative">
+        {/* Interactive Ecosystem Graph */}
+        <section id="ecosystem" className="section-spacious bg-[#090909] border-t border-gray-950 relative">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-20">
               <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest">
@@ -385,8 +388,8 @@ export default function Home() {
               <h2 className="font-serif text-3xl md:text-5xl text-white font-bold tracking-wide mt-2">
                 An Ecosystem of Excellence
               </h2>
-              <div className="w-12 h-[1px] bg-[#C8A34A] mx-auto mt-6" />
-              <p className="text-xs text-gray-500 mt-4 leading-relaxed font-medium">
+              <div className="w-12 h-[1px] bg-[#C8A34A] mx-auto mt-6 mb-8" />
+              <p className="text-xs text-gray-500 leading-relaxed font-medium">
                 WOBT is an umbrella platform that develops and operates initiatives serving professionals, businesses, and society across four core pillars.
               </p>
             </div>
@@ -404,18 +407,14 @@ export default function Home() {
             <h2 className="font-serif text-2xl lg:text-3xl text-white font-bold tracking-wide mt-2">
               Nineteen Specialist Verticals. One Coordinated Platform.
             </h2>
-            <p className="text-xs text-gray-500 mt-2 font-medium">
-              Each vertical is staffed by dedicated legal, financial, or operational experts—engaged individually or together depending on what the matter demands.
-            </p>
           </div>
 
-          {/* Scrolling Marquee Slider */}
           <div className="w-full flex overflow-x-hidden py-4 border-y border-gray-900/60 bg-[#0E0E0E]/40">
             <div className="animate-marquee gap-6">
               {[...liveBrands, ...liveBrands].map((brand, i) => (
                 <div
                   key={i}
-                  className="flex-shrink-0 w-64 p-5 rounded-xl bg-[#0E0E0E] border border-gray-900/80 shadow flex flex-col gap-3 relative group"
+                  className="flex-shrink-0 w-64 p-5 rounded-xl bg-[#0E0E0E] border border-gray-900/80 shadow flex flex-col gap-3 relative group hover:border-[#C8A34A33] transition-all duration-300"
                 >
                   <div className="flex items-center justify-between">
                     <h5 className="font-serif text-white font-bold text-xs uppercase tracking-wider group-hover:text-[#C8A34A] transition-colors">
@@ -435,9 +434,9 @@ export default function Home() {
         </section>
 
         {/* WOBT Capital / Litigation Finance preview */}
-        <section id="wobt-capital" className="py-32 bg-[#090909] border-t border-gray-950 relative">
+        <section id="wobt-capital" className="section-spacious bg-[#090909] border-t border-gray-950 relative">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center mb-20">
               <div className="lg:col-span-7">
                 <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest">
                   WOBT Capital
@@ -448,7 +447,7 @@ export default function Home() {
                 <p className="text-xs text-gray-400 leading-relaxed font-medium mb-6">
                   India&apos;s trusted litigation finance partner—for businesses and individuals pursuing high-stakes commercial disputes and arbitrations, and for the law firms fighting those matters on their behalf. WOBT Capital provides third-party funding to domestic clients in select, meritorious matters on a non-recourse basis.
                 </p>
-                <div className="flex items-center gap-6 text-xs text-[#C8A34A] font-semibold tracking-wider">
+                <div className="flex flex-wrap items-center gap-6 text-xs text-[#C8A34A] font-semibold tracking-wider">
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#C8A34A]" /> No Upfront Costs
                   </div>
@@ -461,7 +460,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="lg:col-span-5 bg-gradient-to-br from-[#0E0E0E] to-[#030303] border border-gray-900 p-8 rounded-2xl relative">
+              <div className="lg:col-span-5 bg-gradient-to-br from-[#0E0E0E] to-[#030303] border border-gray-900 p-8 rounded-2xl relative shadow-2xl">
                 <h3 className="font-serif text-white font-bold text-sm uppercase tracking-wider mb-6 text-center">
                   Request Case Evaluation
                 </h3>
@@ -514,37 +513,24 @@ export default function Home() {
 
             {/* Profile Tabs */}
             <div className="mb-20">
-              <div className="flex border-b border-gray-900 gap-4 mb-8 justify-center">
-                <button
-                  onClick={() => setActiveCapitalTab("clients")}
-                  className={`pb-4 text-xs uppercase tracking-wider font-bold transition-colors focus:outline-none cursor-pointer ${
-                    activeCapitalTab === "clients" ? "text-[#C8A34A] border-b-2 border-b-[#C8A34A]" : "text-gray-500"
-                  }`}
-                >
-                  For Claimants
-                </button>
-                <button
-                  onClick={() => setActiveCapitalTab("lawfirms")}
-                  className={`pb-4 text-xs uppercase tracking-wider font-bold transition-colors focus:outline-none cursor-pointer ${
-                    activeCapitalTab === "lawfirms" ? "text-[#C8A34A] border-b-2 border-b-[#C8A34A]" : "text-gray-500"
-                  }`}
-                >
-                  For Law Firms
-                </button>
-                <button
-                  onClick={() => setActiveCapitalTab("investors")}
-                  className={`pb-4 text-xs uppercase tracking-wider font-bold transition-colors focus:outline-none cursor-pointer ${
-                    activeCapitalTab === "investors" ? "text-[#C8A34A] border-b-2 border-b-[#C8A34A]" : "text-gray-500"
-                  }`}
-                >
-                  For Investors
-                </button>
+              <div className="flex border-b border-gray-900 gap-6 mb-8 justify-center">
+                {(["clients", "lawfirms", "investors"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveCapitalTab(tab)}
+                    className={`pb-4 text-xs uppercase tracking-widest font-bold transition-colors focus:outline-none cursor-pointer ${
+                      activeCapitalTab === tab ? "text-[#C8A34A] border-b-2 border-b-[#C8A34A]" : "text-gray-500"
+                    }`}
+                  >
+                    {tab === "clients" ? "For Claimants" : tab === "lawfirms" ? "For Law Firms" : "For Investors"}
+                  </button>
+                ))}
               </div>
 
-              <div className="bg-[#030303]/40 border border-gray-900 p-8 rounded-2xl max-w-4xl mx-auto">
+              <div className="bg-[#030303]/40 border border-gray-900 p-8 rounded-2xl max-w-4xl mx-auto shadow-inner">
                 {activeCapitalTab === "clients" && (
                   <div>
-                    <h4 className="font-serif text-white font-semibold text-base mb-4">
+                    <h4 className="font-serif text-white font-semibold text-base mb-4 uppercase tracking-wider">
                       Pursue Claims Without Funding Risks
                     </h4>
                     <p className="text-xs text-gray-400 leading-relaxed mb-4 font-medium">
@@ -557,7 +543,7 @@ export default function Home() {
                 )}
                 {activeCapitalTab === "lawfirms" && (
                   <div>
-                    <h4 className="font-serif text-white font-semibold text-base mb-4">
+                    <h4 className="font-serif text-white font-semibold text-base mb-4 uppercase tracking-wider">
                       Backing Law Firms with Operational Liquidity
                     </h4>
                     <p className="text-xs text-gray-400 leading-relaxed mb-4 font-medium">
@@ -570,14 +556,14 @@ export default function Home() {
                 )}
                 {activeCapitalTab === "investors" && (
                   <div>
-                    <h4 className="font-serif text-white font-semibold text-base mb-4">
+                    <h4 className="font-serif text-white font-semibold text-base mb-4 uppercase tracking-wider">
                       Sovereign-Grade Legal Asset Classes
                     </h4>
                     <p className="text-xs text-gray-400 leading-relaxed mb-4 font-medium">
-                      WOBT provides institutional capital deployers and qualified partners with structured access to vetted, high-value commercial claims. Every file is strictly audited by our legal desk, Chartered Accountants, and forensic labs for merit, enforceability, and recovery viability.
+                      WOBT enables access to carefully evaluated legal matters with defined structures and aligned interests. Each opportunity is screened for merit, enforceability, and outcome potential before capital is deployed.
                     </p>
                     <p className="text-xs text-gray-500 leading-relaxed italic">
-                      Disclaimer: WOBT is not registered with SEBI in any capacity, and litigation funding is not structured as a public deposit or standard security asset.
+                      Disclaimer: WOBT is not registered with SEBI as a stock broker, portfolio manager, investment adviser, research analyst, merchant banker, or alternative investment fund/fund manager, and funding is not a security, deposit, or investment product.
                     </p>
                   </div>
                 )}
@@ -587,7 +573,7 @@ export default function Home() {
             <div className="text-center">
               <a
                 href="/platforms/wobt-capital"
-                className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider text-[#090909] bg-[#C8A34A] hover:bg-white hover:text-[#090909] transition-all duration-300 inline-block"
+                className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider text-[#090909] bg-[#C8A34A] hover:bg-white hover:text-[#090909] transition-all duration-300 inline-block hover:scale-105"
               >
                 Go to Dedicated WOBT Capital Page
               </a>
@@ -595,8 +581,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* The WOBT Constitution & 100-Year Timeline Section */}
-        <section className="py-32 bg-[#030303]/40 border-t border-gray-950 relative">
+        {/* The WOBT Constitution Section */}
+        <section className="section-spacious bg-[#030303]/40 border-t border-gray-950 relative">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-20">
               <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest">
@@ -605,17 +591,16 @@ export default function Home() {
               <h2 className="font-serif text-3xl md:text-5xl text-white font-bold tracking-wide mt-2">
                 The WOBT Constitution
               </h2>
-              <div className="w-12 h-[1px] bg-[#C8A34A] mx-auto mt-6" />
-              <p className="text-xs text-gray-500 mt-4 leading-relaxed font-medium font-serif italic mb-6">
+              <div className="w-12 h-[1px] bg-[#C8A34A] mx-auto mt-6 mb-8" />
+              <p className="text-xs text-gray-500 font-serif italic mb-6">
                 &ldquo;The greatest institutions in the world all have three characteristics: a philosophy, a constitution, and an ecosystem. Everything else evolves over time.&rdquo;
               </p>
               
-              {/* PDF Download Button */}
               <div className="flex justify-center mb-10">
                 <a
                   href="/WOBT_Constitution_Draft.pdf"
                   download
-                  className="px-6 py-2.5 rounded-full border border-[#C8A34A33] hover:border-[#C8A34A] text-[#C8A34A] text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#C8A34A0A] transition-all"
+                  className="px-6 py-2.5 rounded-full border border-[#C8A34A33] hover:border-[#C8A34A] text-[#C8A34A] text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-[#C8A34A0A] transition-all cursor-pointer"
                 >
                   <FiDownload /> Download Complete Constitution PDF
                 </a>
@@ -627,7 +612,7 @@ export default function Home() {
         </section>
 
         {/* Membership Section */}
-        <section id="membership" className="py-32 bg-[#090909] border-t border-gray-950 relative">
+        <section id="membership" className="section-spacious bg-[#090909] border-t border-gray-950 relative">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-20">
               <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest">
@@ -636,41 +621,41 @@ export default function Home() {
               <h2 className="font-serif text-3xl md:text-5xl text-white font-bold tracking-wide mt-2">
                 Join the Multidisciplinary Ecosystem
               </h2>
-              <div className="w-12 h-[1px] bg-[#C8A34A] mx-auto mt-6" />
-              <p className="text-xs text-gray-500 mt-4 leading-relaxed font-medium">
+              <div className="w-12 h-[1px] bg-[#C8A34A] mx-auto mt-6 mb-8" />
+              <p className="text-xs text-gray-500 leading-relaxed font-medium">
                 Affiliation with WOBT connects professionals, academics, and institutional leaders, offering structured collaboration across borders.
               </p>
             </div>
 
             {/* Preview cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
-              <div className="p-6 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
+              <div className="p-8 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between hover:border-[#C8A34A33] transition-all duration-300">
                 <div>
-                  <h3 className="font-serif text-white font-bold text-sm uppercase tracking-wider mb-2">Professional Members</h3>
-                  <p className="text-[11px] text-gray-400 leading-relaxed font-medium">For advocates, Chartered Accountants, arbitrators, and compliance advisors.</p>
+                  <h3 className="font-serif text-white font-bold text-sm uppercase tracking-wider mb-3">Professional Members</h3>
+                  <p className="text-[11px] text-gray-400 leading-relaxed font-medium">For advocates, Chartered Accountants, compliance advisors, and arbitrators.</p>
                 </div>
-                <a href="/membership" className="text-xs text-[#C8A34A] font-bold mt-4 hover:underline">Read details →</a>
+                <a href="/membership" className="text-xs text-[#C8A34A] font-bold mt-6 hover:underline">Read details →</a>
               </div>
-              <div className="p-6 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between">
+              <div className="p-8 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between hover:border-[#C8A34A33] transition-all duration-300">
                 <div>
-                  <h3 className="font-serif text-white font-bold text-sm uppercase tracking-wider mb-2">Distinguished Fellows</h3>
+                  <h3 className="font-serif text-white font-bold text-sm uppercase tracking-wider mb-3">Distinguished Fellows</h3>
                   <p className="text-[11px] text-gray-400 leading-relaxed font-medium">Reserved for senior industry leaders, retired judges, and academic chairs.</p>
                 </div>
-                <a href="/membership" className="text-xs text-[#C8A34A] font-bold mt-4 hover:underline">Read details →</a>
+                <a href="/membership" className="text-xs text-[#C8A34A] font-bold mt-6 hover:underline">Read details →</a>
               </div>
-              <div className="p-6 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between">
+              <div className="p-8 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between hover:border-[#C8A34A33] transition-all duration-300">
                 <div>
-                  <h3 className="font-serif text-white font-bold text-sm uppercase tracking-wider mb-2">University Affiliations</h3>
+                  <h3 className="font-serif text-white font-bold text-sm uppercase tracking-wider mb-3">University Affiliations</h3>
                   <p className="text-[11px] text-gray-400 leading-relaxed font-medium">Partner programs with law schools and technological institutes.</p>
                 </div>
-                <a href="/membership" className="text-xs text-[#C8A34A] font-bold mt-4 hover:underline">Read details →</a>
+                <a href="/membership" className="text-xs text-[#C8A34A] font-bold mt-6 hover:underline">Read details →</a>
               </div>
             </div>
 
             <div className="text-center">
               <a
                 href="/membership"
-                className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider text-[#090909] bg-[#C8A34A] hover:bg-white hover:text-[#090909] transition-all duration-300 inline-block"
+                className="px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider text-[#090909] bg-[#C8A34A] hover:bg-white hover:text-[#090909] transition-all duration-300 inline-block hover:scale-105"
               >
                 View All 8 Fellowship Tiers
               </a>
@@ -679,7 +664,7 @@ export default function Home() {
         </section>
 
         {/* Research Portal */}
-        <section id="research" className="py-32 bg-[#030303]/40 border-t border-gray-950 relative">
+        <section id="research" className="section-spacious bg-[#030303]/40 border-t border-gray-950 relative">
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-16">
               <div>
@@ -708,11 +693,11 @@ export default function Home() {
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               {filteredResearch.map((paper, idx) => (
                 <div
                   key={idx}
-                  className="p-6 rounded-2xl bg-[#0E0E0E] border border-gray-900 flex flex-col justify-between"
+                  className="p-6 rounded-2xl bg-[#0E0E0E] border border-gray-900 flex flex-col justify-between hover:border-[#C8A34A26] transition-all duration-300"
                 >
                   <div>
                     <span className="px-2 py-0.5 rounded bg-gray-950 border border-gray-800 uppercase tracking-widest text-[#C8A34A] text-[9px] font-bold">
@@ -733,7 +718,7 @@ export default function Home() {
             <div className="text-center">
               <a
                 href="/research"
-                className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider text-white border border-gray-800 hover:border-[#C8A34A] transition-all inline-block"
+                className="px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider text-white border border-gray-800 hover:border-[#C8A34A] transition-all inline-block hover:scale-105"
               >
                 Access Research Archives
               </a>
@@ -742,7 +727,7 @@ export default function Home() {
         </section>
 
         {/* Global Council Events Calendar */}
-        <section id="events" className="py-32 bg-[#090909] border-t border-gray-950 relative">
+        <section id="events" className="section-spacious bg-[#090909] border-t border-gray-950 relative">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-20">
               <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest">
@@ -754,7 +739,7 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="p-6 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between hover:border-[#C8A34A33] transition-all duration-300">
                 <div>
                   <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
                     <FiCalendar className="text-[#C8A34A]" />
@@ -773,7 +758,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="p-6 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between hover:border-[#C8A34A33] transition-all duration-300">
                 <div>
                   <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
                     <FiCalendar className="text-[#C8A34A]" />
@@ -792,7 +777,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="p-6 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-[#030303]/60 border border-gray-900 flex flex-col justify-between hover:border-[#C8A34A33] transition-all duration-300">
                 <div>
                   <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
                     <FiCalendar className="text-[#C8A34A]" />
@@ -814,12 +799,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Interactive Contact & Global Chapters Section */}
-        <section id="contact" className="py-32 bg-[#030303]/40 border-t border-gray-950 relative">
+        {/* Contact & Global Hubs Section */}
+        <section id="contact" className="section-spacious bg-[#030303]/40 border-t border-gray-950 relative">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
               
-              {/* Map/Globe Node Column */}
               <div className="lg:col-span-5 flex flex-col gap-8 justify-center">
                 <div>
                   <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest">
@@ -836,7 +820,6 @@ export default function Home() {
                 <InteractiveGlobe />
               </div>
 
-              {/* Booking and contact form column */}
               <div className="lg:col-span-7 bg-[#0E0E0E]/80 border border-gray-900 rounded-3xl p-8 lg:p-10 relative">
                 <div>
                   <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest font-mono">
@@ -850,8 +833,8 @@ export default function Home() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    setFormSubmitted(true);
-                    setTimeout(() => setFormSubmitted(false), 5000);
+                    setEvalSubmitted(true);
+                    setTimeout(() => setEvalSubmitted(false), 5000);
                   }}
                   className="flex flex-col gap-5"
                 >
@@ -903,13 +886,14 @@ export default function Home() {
                     Submit Official Request
                   </button>
 
-                  {formSubmitted && (
+                  {evalSubmitted && (
                     <div className="p-3 rounded bg-[#C8A34A0F] border border-[#C8A34A26] text-[10px] text-[#C8A34A] text-center">
                       Request successfully transmitted. A WOBT Compliance Officer will respond shortly.
                     </div>
                   )}
                 </form>
               </div>
+
             </div>
           </div>
         </section>

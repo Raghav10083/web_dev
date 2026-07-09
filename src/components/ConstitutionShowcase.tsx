@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { FiBookOpen, FiChevronDown, FiShield, FiCpu, FiGlobe, FiAward, FiLayers, FiCheckSquare, FiTerminal } from "react-icons/fi";
+import { FiBookOpen, FiShield, FiCpu, FiGlobe, FiAward, FiLayers, FiCheckSquare, FiTerminal } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface VolumeItem {
   volume: string;
@@ -13,7 +14,8 @@ interface VolumeItem {
 }
 
 export default function ConstitutionShowcase() {
-  const [activeVolume, setActiveVolume] = useState<number | null>(0);
+  const [activeVolume, setActiveVolume] = useState<number>(0);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   const volumes: VolumeItem[] = [
     {
@@ -114,16 +116,24 @@ export default function ConstitutionShowcase() {
     },
   ];
 
+  const selectVolume = (idx: number) => {
+    setIsFlipped(true);
+    setTimeout(() => {
+      setActiveVolume(idx);
+      setIsFlipped(false);
+    }, 250);
+  };
+
   return (
     <div className="flex flex-col lg:flex-row gap-12 items-stretch">
       {/* Timeline Nav List */}
-      <div className="lg:w-1/2 flex flex-col gap-3 max-h-[600px] overflow-y-auto pr-3 scrollbar-none border-r border-[#C8A34A08]">
+      <div className="lg:w-1/2 flex flex-col gap-3 max-h-[580px] overflow-y-auto pr-3 border-r border-[#C8A34A08] scrollbar-none">
         {volumes.map((vol, idx) => {
           const isActive = activeVolume === idx;
           return (
             <div
               key={vol.volume}
-              onClick={() => setActiveVolume(idx)}
+              onClick={() => selectVolume(idx)}
               className={`p-5 rounded-xl border text-left cursor-pointer transition-all duration-300 flex items-start gap-4 relative group ${
                 isActive
                   ? "bg-[#C8A34A0A] border-[#C8A34A4D] shadow-[0_0_15px_rgba(200,163,74,0.05)]"
@@ -160,61 +170,93 @@ export default function ConstitutionShowcase() {
         })}
       </div>
 
-      {/* Detail Preview Card */}
-      <div className="lg:w-1/2 bg-[#0E0E0E]/80 border border-gray-900 rounded-2xl p-8 flex flex-col justify-between relative overflow-hidden">
-        {/* Glow */}
-        <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-[#C8A34A05] blur-3xl pointer-events-none" />
+      {/* 3D Book Detail Display Column */}
+      <div className="lg:w-1/2 flex flex-col justify-between bg-[#0E0E0E]/80 border border-gray-900 rounded-3xl p-8 relative overflow-hidden min-h-[460px]">
+        {/* Ambient gold glow */}
+        <div className="absolute -bottom-10 -left-10 w-44 h-44 rounded-full bg-[#C8A34A03] blur-3xl pointer-events-none" />
 
-        {activeVolume !== null ? (
-          <div className="flex flex-col gap-6 h-full justify-between">
-            <div className="flex flex-col gap-4">
-              <div>
-                <span className="px-2.5 py-1 rounded bg-[#C8A34A1A] text-[#C8A34A] text-[10px] uppercase tracking-wider font-bold">
-                  {volumes[activeVolume].volume}
-                </span>
-                <h3 className="font-serif text-white text-xl font-bold tracking-wide mt-3">
-                  {volumes[activeVolume].title}
-                </h3>
-                <span className="text-xs text-[#C8A34A] italic tracking-wide mt-1 block">
-                  {volumes[activeVolume].subtitle}
-                </span>
+        <div className="flex flex-col md:flex-row gap-8 items-center md:items-start h-full justify-between">
+          
+          {/* 3D Book element */}
+          <div className="book-container py-4 flex-shrink-0">
+            <div className="book">
+              {/* Outer Cover swings open on hover */}
+              <div className="book-cover flex flex-col justify-between p-4 bg-[#090909] border border-[#C8A34A33] rounded-r-md">
+                <div className="h-[2px] bg-[#C8A34A66] w-full" />
+                <div className="text-center">
+                  <span className="text-[9px] uppercase tracking-widest text-gray-500 font-bold block mb-1">
+                    {volumes[activeVolume].volume}
+                  </span>
+                  <h4 className="font-serif text-white font-bold text-xs uppercase tracking-wider leading-relaxed">
+                    {volumes[activeVolume].title.split(" &")[0]}
+                  </h4>
+                </div>
+                <div className="flex justify-center">
+                  <div className="w-6 h-6 rounded-full border border-[#C8A34A4D] flex items-center justify-center">
+                    <span className="text-[8px] font-serif text-[#C8A34A]">W</span>
+                  </div>
+                </div>
               </div>
-              
-              <div className="h-[1px] bg-gray-900 w-full" />
-              
-              <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                {volumes[activeVolume].summary}
-              </p>
-            </div>
 
-            <div className="mt-4">
-              <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3 block">
-                Constitutional Provisions
-              </span>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                {volumes[activeVolume].contents.map((item, index) => (
-                  <li key={index} className="flex items-center gap-2.5 text-xs text-gray-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#C8A34A]" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-gray-900 flex justify-between items-center text-xs">
-              <span className="text-gray-500 tracking-wider font-mono">
-                WOBT.CONSTITUTION.{volumes[activeVolume].volume.replace("Volume ", "")}.v1.0
-              </span>
-              <span className="text-[#C8A34A] font-semibold tracking-wider uppercase flex items-center gap-1">
-                Authorized Draft
-              </span>
+              {/* Inside Page holds visual text lines */}
+              <div className="book-pages p-3 flex flex-col gap-1.5 justify-start overflow-hidden">
+                <div className="h-2 w-12 bg-gray-300 rounded" />
+                <div className="h-[1px] bg-gray-200 w-full my-1" />
+                <div className="h-1.5 w-full bg-gray-200 rounded" />
+                <div className="h-1.5 w-[90%] bg-gray-200 rounded" />
+                <div className="h-1.5 w-[85%] bg-gray-200 rounded" />
+                <div className="h-1.5 w-full bg-gray-200 rounded" />
+                <div className="h-1.5 w-[80%] bg-gray-200 rounded" />
+                <div className="h-1.5 w-[70%] bg-gray-200 rounded" />
+              </div>
             </div>
           </div>
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-500 text-xs py-20 font-serif italic">
-            Select a volume to preview the WOBT Constitution.
-          </div>
-        )}
+
+          {/* Details Column with slide flips */}
+          <AnimatePresence mode="wait">
+            {!isFlipped && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="flex-1 flex flex-col justify-between h-full min-h-[300px]"
+              >
+                <div>
+                  <span className="text-[#C8A34A] text-[10px] uppercase font-bold tracking-widest font-mono">
+                    Charter Chapter
+                  </span>
+                  <h3 className="font-serif text-white text-xl font-bold tracking-wide mt-2">
+                    {volumes[activeVolume].title}
+                  </h3>
+                  <span className="text-[11px] text-gray-500 font-medium italic mt-1 block leading-relaxed">
+                    {volumes[activeVolume].subtitle}
+                  </span>
+                  <p className="text-[11px] text-gray-400 leading-relaxed mt-4 font-medium">
+                    {volumes[activeVolume].summary}
+                  </p>
+                </div>
+
+                <div className="h-[1.5px] bg-gray-900 my-4" />
+
+                <div>
+                  <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3 block">
+                    Core Provisions
+                  </span>
+                  <ul className="flex flex-col gap-2">
+                    {volumes[activeVolume].contents.map((item, index) => (
+                      <li key={index} className="flex items-start gap-2 text-[10px] text-gray-400">
+                        <span className="text-[#C8A34A] mt-0.5">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </div>
       </div>
     </div>
   );
