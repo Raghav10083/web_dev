@@ -1,5 +1,6 @@
 "use client";
 
+// High-fidelity 3D marble hall gallery dolly camera fly-through with monument reveal and logo morphing.
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
