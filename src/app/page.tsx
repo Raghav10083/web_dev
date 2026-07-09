@@ -192,7 +192,7 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 10.5, duration: 1.5 }}
+              transition={{ delay: 8.5, duration: 1.5 }}
               className="flex flex-col items-center mt-12"
             >
               <span className="text-[#C8A34A] text-xs font-bold uppercase tracking-widest mb-4">
