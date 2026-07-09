@@ -18,7 +18,7 @@ interface Particle {
 }
 
 interface OwlCanvasProps {
-  scrollProgress?: number; // 0 to 1 based on hero scroll out
+  scrollProgress?: number;
 }
 
 export default function OwlCanvas({ scrollProgress = 0 }: OwlCanvasProps) {
@@ -35,18 +35,12 @@ export default function OwlCanvas({ scrollProgress = 0 }: OwlCanvasProps) {
     };
     window.addEventListener("mousemove", handleMouseMove);
 
-    // Timestamps based on specifications:
-    // 0s - 1.5s: particles drift, world map visible, faint neural lines
-    // 1.5s - 3s: particles converge (three phases)
-    // 3s - 5s: owl visible, eyes illuminate, glow spreads, lines expand
-    // 5s - 7s: text and CTAs fade in
     const timers = [
-      setTimeout(() => setStage(1), 100),   // Stage 1: Nearly black background, golden particles drift
-      setTimeout(() => setStage(2), 1500),  // Stage 2: Convergence begins (Loose particles)
-      setTimeout(() => setStage(3), 2200),  // Stage 3: Convergence (Recognizable silhouette)
-      setTimeout(() => setStage(4), 3000),  // Stage 4: Fully refined owl & eyes illuminate
-      setTimeout(() => setStage(5), 4000),  // Stage 5: Neural lines expand
-      setTimeout(() => setStage(6), 5000),  // Stage 6: Text & CTAs fade in
+      setTimeout(() => setStage(1), 100),   // Stage 1: drift stars
+      setTimeout(() => setStage(2), 1200),  // Stage 2: converge begins
+      setTimeout(() => setStage(3), 2200),  // Stage 3: silhouette forms
+      setTimeout(() => setStage(4), 3000),  // Stage 4: fully formed & eyes glow
+      setTimeout(() => setStage(5), 4500),  // Stage 5: neural network spreads
     ];
 
     return () => {
@@ -68,62 +62,120 @@ export default function OwlCanvas({ scrollProgress = 0 }: OwlCanvasProps) {
     const particles: Particle[] = [];
     const numParticles = 1600;
     const centerX = width / 2;
-    const centerY = height / 2 - 30;
+    const centerY = height / 2 - 40;
 
-    // Helper: sample points on a line
-    const getLinePoints = (x1: number, y1: number, x2: number, y2: number, count: number) => {
+    // Bezier curve sampler helper
+    const getBezierPoints = (
+      x1: number, y1: number,
+      cpX: number, cpY: number,
+      x2: number, y2: number,
+      count: number
+    ) => {
       const pts = [];
       for (let i = 0; i < count; i++) {
         const t = i / (count - 1 || 1);
+        const mt = 1 - t;
+        const x = mt * mt * x1 + 2 * mt * t * cpX + t * t * x2;
+        const y = mt * mt * y1 + 2 * mt * t * cpY + t * t * y2;
+        pts.push({ x, y });
+      }
+      return pts;
+    };
+
+    // Circle sampler helper
+    const getCirclePoints = (cx: number, cy: number, r: number, count: number) => {
+      const pts = [];
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
         pts.push({
-          x: x1 + (x2 - x1) * t,
-          y: y1 + (y2 - y1) * t,
+          x: cx + Math.cos(angle) * r,
+          y: cy + Math.sin(angle) * r,
         });
       }
       return pts;
     };
 
-    // Construct owl coordinate mesh
-    const owlShapes = [
-      // Head Top & Ears
-      ...getLinePoints(centerX - 40, centerY - 100, centerX + 40, centerY - 100, 30),
-      ...getLinePoints(centerX - 40, centerY - 100, centerX - 55, centerY - 70, 25),
-      ...getLinePoints(centerX + 40, centerY - 100, centerX + 55, centerY - 70, 25),
-      ...getLinePoints(centerX - 55, centerY - 70, centerX - 40, centerY - 45, 20),
-      ...getLinePoints(centerX + 55, centerY - 70, centerX + 40, centerY - 45, 20),
-      ...getLinePoints(centerX - 40, centerY - 45, centerX + 40, centerY - 45, 30),
-
-      // Torso Outline
-      ...getLinePoints(centerX - 35, centerY - 45, centerX - 40, centerY + 80, 80),
-      ...getLinePoints(centerX + 35, centerY - 45, centerX + 40, centerY + 80, 80),
-      ...getLinePoints(centerX - 40, centerY + 80, centerX, centerY + 115, 40),
-      ...getLinePoints(centerX + 40, centerY + 80, centerX, centerY + 115, 40),
-
-      // Left Wing outline
-      ...getLinePoints(centerX - 40, centerY - 45, centerX - 160, centerY - 10, 90),
-      ...getLinePoints(centerX - 160, centerY - 10, centerX - 40, centerY + 80, 90),
-
-      // Right Wing outline
-      ...getLinePoints(centerX + 40, centerY - 45, centerX + 160, centerY - 10, 90),
-      ...getLinePoints(centerX + 160, centerY - 10, centerX + 40, centerY + 80, 90),
+    // Exact Logo geometry definitions
+    const whiteLeftEyebrow = [
+      ...getBezierPoints(centerX - 5, centerY - 45, centerX - 30, centerY - 95, centerX - 70, centerY - 50, 45),
+      ...getBezierPoints(centerX - 5, centerY - 45, centerX - 35, centerY - 70, centerX - 70, centerY - 50, 45),
     ];
 
-    // Initialize particles (some gold, mostly white/soft gold highlights)
+    const goldRightEyebrow = [
+      ...getBezierPoints(centerX + 5, centerY - 45, centerX + 30, centerY - 95, centerX + 70, centerY - 50, 45),
+      ...getBezierPoints(centerX + 5, centerY - 45, centerX + 35, centerY - 70, centerX + 70, centerY - 50, 45),
+    ];
+
+    const leftEyeCircle = getCirclePoints(centerX - 35, centerY - 40, 14, 50);
+    const leftEyePupil = getCirclePoints(centerX - 35, centerY - 40, 7, 30);
+    
+    const rightEyeCircle = getCirclePoints(centerX + 35, centerY - 40, 14, 50);
+    const rightEyePupil = getCirclePoints(centerX + 35, centerY - 40, 7, 30);
+
+    // Three swooshes matching chest stripes
+    const stripe1White = [
+      ...getBezierPoints(centerX - 68, centerY - 15, centerX - 30, centerY - 40, centerX + 40, centerY - 35, 55),
+      ...getBezierPoints(centerX - 68, centerY - 15, centerX - 25, centerY + 10, centerX + 40, centerY - 10, 55),
+    ];
+
+    const stripe2Gold = [
+      ...getBezierPoints(centerX - 60, centerY + 10, centerX - 10, centerY - 15, centerX + 42, centerY + 10, 55),
+      ...getBezierPoints(centerX - 60, centerY + 10, centerX - 5, centerY + 38, centerX + 42, centerY + 30, 55),
+    ];
+
+    const stripe3White = [
+      ...getBezierPoints(centerX - 48, centerY + 35, centerX + 15, centerY + 10, centerX + 44, centerY + 50, 55),
+      ...getBezierPoints(centerX - 48, centerY + 35, centerX + 10, centerY + 90, centerX + 44, centerY + 50, 55),
+      ...getBezierPoints(centerX - 10, centerY + 105, centerX + 10, centerY + 80, centerX + 44, centerY + 50, 40),
+    ];
+
+    const totalShapePoints = [
+      ...whiteLeftEyebrow.map(pt => ({ ...pt, color: "#FFFFFF" })),
+      ...goldRightEyebrow.map(pt => ({ ...pt, color: "#C8A34A" })),
+      ...leftEyeCircle.map(pt => ({ ...pt, color: "#FFFFFF" })),
+      ...leftEyePupil.map(pt => ({ ...pt, color: "#FFFFFF" })),
+      ...rightEyeCircle.map(pt => ({ ...pt, color: "#C8A34A" })),
+      ...rightEyePupil.map(pt => ({ ...pt, color: "#C8A34A" })),
+      ...stripe1White.map(pt => ({ ...pt, color: "#FFFFFF" })),
+      ...stripe2Gold.map(pt => ({ ...pt, color: "#C8A34A" })),
+      ...stripe3White.map(pt => ({ ...pt, color: "#FFFFFF" })),
+    ];
+
+    // Initialize particles mapping to exact logo coordinates
     for (let i = 0; i < numParticles; i++) {
       const origX = Math.random() * width;
       const origY = Math.random() * height;
 
       let targetX = centerX;
       let targetY = centerY;
+      let pColor = "#FFFFFF";
 
-      if (i < owlShapes.length) {
-        targetX = owlShapes[i].x;
-        targetY = owlShapes[i].y;
+      if (i < totalShapePoints.length) {
+        targetX = totalShapePoints[i].x;
+        targetY = totalShapePoints[i].y;
+        pColor = totalShapePoints[i].color;
       } else {
-        // Inner chest feathers / volumetric filler
-        const t = Math.random();
-        targetX = centerX + (Math.random() - 0.5) * 60 * (1 - t * 0.4);
-        targetY = centerY - 35 + t * 120;
+        // Filler within the stripes
+        const randS = Math.random();
+        if (randS < 0.4) {
+          // Filler Stripe 1
+          const pt = stripe1White[Math.floor(Math.random() * stripe1White.length)];
+          targetX = pt.x + (Math.random() - 0.5) * 5;
+          targetY = pt.y + (Math.random() - 0.5) * 5;
+          pColor = "#FFFFFF";
+        } else if (randS < 0.7) {
+          // Filler Stripe 2
+          const pt = stripe2Gold[Math.floor(Math.random() * stripe2Gold.length)];
+          targetX = pt.x + (Math.random() - 0.5) * 5;
+          targetY = pt.y + (Math.random() - 0.5) * 5;
+          pColor = "#C8A34A";
+        } else {
+          // Filler Stripe 3
+          const pt = stripe3White[Math.floor(Math.random() * stripe3White.length)];
+          targetX = pt.x + (Math.random() - 0.5) * 5;
+          targetY = pt.y + (Math.random() - 0.5) * 5;
+          pColor = "#FFFFFF";
+        }
       }
 
       particles.push({
@@ -133,22 +185,20 @@ export default function OwlCanvas({ scrollProgress = 0 }: OwlCanvasProps) {
         origY,
         targetX,
         targetY,
-        size: Math.random() * 1.5 + 0.5,
-        alpha: Math.random() * 0.4 + 0.3,
-        color: Math.random() > 0.2 ? "#FFFFFF" : "#C8A34A",
-        speed: Math.random() * 0.03 + 0.015,
+        size: Math.random() * 1.6 + 0.6,
+        alpha: Math.random() * 0.45 + 0.35,
+        color: pColor,
+        speed: Math.random() * 0.035 + 0.015,
         angle: Math.random() * Math.PI * 2,
         id: i,
       });
     }
 
-    // Spreading global neural targets
-    const neuralPaths = [
-      { x: centerX - 280, y: centerY - 90, active: false, cx: centerX, cy: centerY },
-      { x: centerX - 330, y: centerY + 100, active: false, cx: centerX, cy: centerY },
-      { x: centerX + 280, y: centerY - 100, active: false, cx: centerX, cy: centerY },
-      { x: centerX + 340, y: centerY + 90, active: false, cx: centerX, cy: centerY },
-      { x: centerX - 200, y: centerY - 180, active: false, cx: centerX, cy: centerY },
+    const neuralNodes = [
+      { x: centerX - 270, y: centerY - 80, cx: centerX, cy: centerY },
+      { x: centerX - 320, y: centerY + 90, cx: centerX, cy: centerY },
+      { x: centerX + 270, y: centerY - 90, cx: centerX, cy: centerY },
+      { x: centerX + 330, y: centerY + 80, cx: centerX, cy: centerY },
     ];
 
     let time = 0;
@@ -157,74 +207,67 @@ export default function OwlCanvas({ scrollProgress = 0 }: OwlCanvasProps) {
       time += 0.015;
       ctx.clearRect(0, 0, width, height);
 
-      // Mouse Parallax
       const dx = (mousePos.current.x - width / 2) * 0.03;
       const dy = (mousePos.current.y - height / 2) * 0.03;
       mousePos.current.rx += (dx - mousePos.current.rx) * 0.08;
       mousePos.current.ry += (dy - mousePos.current.ry) * 0.08;
 
-      // Volumetric lighting / Vignette background glow
-      const vignette = ctx.createRadialGradient(centerX, centerY, 50, centerX, centerY, width / 2);
-      vignette.addColorStop(0, "rgba(200, 163, 74, 0.03)");
+      // Golden ambient vignette
+      const vignette = ctx.createRadialGradient(centerX, centerY, 40, centerX, centerY, width / 2);
+      vignette.addColorStop(0, "rgba(200, 163, 74, 0.035)");
       vignette.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, width, height);
 
-      // Faint backing world map grid
+      // Faint mapping globe line background
       if (stage >= 1) {
         ctx.strokeStyle = "rgba(200, 163, 74, 0.015)";
         ctx.lineWidth = 0.5;
         ctx.beginPath();
-        ctx.arc(centerX + mousePos.current.rx * 0.2, centerY + mousePos.current.ry * 0.2, 180, 0, Math.PI * 2);
+        ctx.arc(centerX + mousePos.current.rx * 0.2, centerY + mousePos.current.ry * 0.2, 190, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // Draw and transform particles
       particles.forEach((p, idx) => {
         let tx = p.targetX;
         let ty = p.targetY;
 
-        // Slow orbits/constellations backing for loose drift particles
         if (stage === 1) {
           p.x += Math.cos(p.angle + time * 0.1) * 0.4;
           p.y += Math.sin(p.angle + time * 0.1) * 0.4;
         } else {
-          // Stage 2: Convergence
           let progressFactor = 1;
-          if (stage === 2) progressFactor = 0.3; // loose particles
-          if (stage === 3) progressFactor = 0.75; // recognizable silhouette
+          if (stage === 2) progressFactor = 0.35; // loose
+          if (stage === 3) progressFactor = 0.78; // silhouette
 
-          // Micro breathing idle animation
-          const breatheY = Math.sin(time * 1.5 + idx * 0.02) * 1.0;
+          const breatheY = Math.sin(time * 1.5 + idx * 0.02) * 0.8;
 
-          // Timer-based head rotation (every 12 seconds)
+          // Head tilt timed looking effect
           let headX = 0;
           const cycle = Math.floor(time / 12) % 2;
-          if (cycle === 0 && ty < centerY - 45) {
-            headX = Math.sin(time * 0.5) * 3.5; // slow look
+          if (cycle === 0 && ty < centerY - 30) {
+            headX = Math.sin(time * 0.4) * 3;
           }
 
-          // Scroll dissolution: pull down and randomize
+          // Scroll dissolution
           if (scrollProgress > 0) {
             ty += scrollProgress * 550;
             tx += (Math.sin(time + idx) * 120 * scrollProgress);
             p.alpha = Math.max(0, p.alpha - scrollProgress * 0.01);
           }
 
-          // Move particles
-          p.x += (tx + headX + dx + (Math.cos(p.angle) * 2 * (1 - progressFactor)) - p.x) * p.speed * progressFactor;
+          p.x += (tx + headX + dx + (Math.cos(p.angle) * 1.5 * (1 - progressFactor)) - p.x) * p.speed * progressFactor;
           p.y += (ty + breatheY + dy - p.y) * p.speed * progressFactor;
         }
 
-        // Mouse interaction: push particles
         const mx = mousePos.current.x;
         const my = mousePos.current.y;
         const dist = Math.hypot(p.x - mx, p.y - my);
         if (dist < 80) {
-          const pushForce = (80 - dist) / 80;
-          const pushAngle = Math.atan2(p.y - my, p.x - mx);
-          p.x += Math.cos(pushAngle) * pushForce * 12;
-          p.y += Math.sin(pushAngle) * pushForce * 12;
+          const force = (80 - dist) / 80;
+          const angle = Math.atan2(p.y - my, p.x - mx);
+          p.x += Math.cos(angle) * force * 12;
+          p.y += Math.sin(angle) * force * 12;
         }
 
         ctx.fillStyle = p.color;
@@ -234,38 +277,37 @@ export default function OwlCanvas({ scrollProgress = 0 }: OwlCanvasProps) {
         ctx.fill();
       });
 
-      // 3. Eye Glow Shimmer (Stage 4+)
+      // Eyes glow (Stage 4+)
       if (stage >= 4) {
-        const eyePulse = 0.65 + Math.sin(time * 3) * 0.15; // slow shimmer
+        const eyePulse = 0.65 + Math.sin(time * 3) * 0.15;
         ctx.shadowColor = "#C8A34A";
         ctx.shadowBlur = 10;
-
         ctx.fillStyle = "rgba(200, 163, 74, " + eyePulse + ")";
         ctx.globalAlpha = (1 - scrollProgress);
 
-        // Left eye
+        // left pupil glow
         ctx.beginPath();
-        ctx.arc(centerX - 18 + mousePos.current.rx * 0.7, centerY - 65 + mousePos.current.ry * 0.7, 3, 0, Math.PI * 2);
+        ctx.arc(centerX - 35 + mousePos.current.rx * 0.7, centerY - 40 + mousePos.current.ry * 0.7, 3, 0, Math.PI * 2);
         ctx.fill();
 
-        // Right eye
+        // right pupil glow
         ctx.beginPath();
-        ctx.arc(centerX + 18 + mousePos.current.rx * 0.7, centerY - 65 + mousePos.current.ry * 0.7, 3, 0, Math.PI * 2);
+        ctx.arc(centerX + 35 + mousePos.current.rx * 0.7, centerY - 40 + mousePos.current.ry * 0.7, 3, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.shadowBlur = 0; // reset
+        ctx.shadowBlur = 0;
       }
 
-      // 4. Growing neural lines spread (Stage 5+)
+      // Spreading network lines (Stage 5+)
       if (stage >= 5) {
-        neuralPaths.forEach((node) => {
+        neuralNodes.forEach((node) => {
           node.cx += (node.x + mousePos.current.rx * 0.4 - node.cx) * 0.05;
           node.cy += (node.y + mousePos.current.ry * 0.4 - node.cy) * 0.05;
 
-          ctx.strokeStyle = "rgba(200, 163, 74, 0.12)";
+          ctx.strokeStyle = "rgba(200, 163, 74, 0.1)";
           ctx.lineWidth = 0.8;
           ctx.beginPath();
-          ctx.moveTo(centerX + mousePos.current.rx * 0.7, centerY - 50 + mousePos.current.ry * 0.7);
+          ctx.moveTo(centerX + mousePos.current.rx * 0.7, centerY - 10 + mousePos.current.ry * 0.7);
           ctx.lineTo(node.cx, node.cy);
           ctx.stroke();
 
