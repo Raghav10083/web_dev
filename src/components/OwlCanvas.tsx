@@ -1,5 +1,7 @@
 "use client";
 
+// Real-time canvas particle system rendering the WOBT owl logo and morphing it to stardust lettering.
+
 import React, { useRef, useEffect, useState } from "react";
 
 interface Particle {
