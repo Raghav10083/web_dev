@@ -8,6 +8,7 @@ import InteractiveGlobe from "@/components/InteractiveGlobe";
 import EcosystemGraph from "@/components/EcosystemGraph";
 import ConstitutionShowcase from "@/components/ConstitutionShowcase";
 import OwlCanvas from "@/components/OwlCanvas";
+import CinematicIntro from "@/components/CinematicIntro";
 import SmoothScroll from "@/components/SmoothScroll";
 import { FiArrowRight, FiCalendar, FiDownload, FiCheckCircle } from "react-icons/fi";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -17,6 +18,21 @@ export default function Home() {
   const [researchFilter, setResearchFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [evalSubmitted, setEvalSubmitted] = useState(false);
+  const [introActive, setIntroActive] = useState(false);
+
+  useEffect(() => {
+    const played = sessionStorage.getItem("wobt_intro_played");
+    if (!played) {
+      setIntroActive(true);
+      document.body.style.overflow = "hidden";
+    }
+  }, []);
+
+  const handleIntroComplete = () => {
+    sessionStorage.setItem("wobt_intro_played", "true");
+    setIntroActive(false);
+    document.body.style.overflow = "unset";
+  };
 
   // Parallax mouse coordinates
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -172,10 +188,25 @@ export default function Home() {
   });
 
   return (
-    <SmoothScroll>
-      <div className="relative min-h-screen">
-        <div className="noise-overlay" />
-        <Navbar />
+    <>
+      <AnimatePresence>
+        {introActive && (
+          <CinematicIntro onComplete={handleIntroComplete} />
+        )}
+      </AnimatePresence>
+
+      <SmoothScroll>
+        <motion.div
+          className="relative min-h-screen"
+          animate={{
+            scale: introActive ? 0.95 : 1,
+            opacity: introActive ? 0 : 1,
+            filter: introActive ? "blur(10px)" : "blur(0px)",
+          }}
+          transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="noise-overlay" />
+          <Navbar />
 
         {/* Cinematic Hero */}
         <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center pt-32 pb-16 overflow-hidden bg-[#030303]">
@@ -915,7 +946,8 @@ export default function Home() {
         </section>
 
         <Footer />
-      </div>
+      </motion.div>
     </SmoothScroll>
+    </>
   );
 }
