@@ -32,9 +32,23 @@ export default function Home() {
   }, []);
 
   // Scroll storytelling refs
+  const heroRef = useRef<HTMLDivElement>(null);
   const owlContainerRef = useRef<HTMLDivElement>(null);
   const tigerContainerRef = useRef<HTMLDivElement>(null);
   const philosophyContainerRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress: heroScroll } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+
+  const [heroProgress, setHeroProgress] = useState(0);
+
+  useEffect(() => {
+    return heroScroll.on("change", (latest) => {
+      setHeroProgress(latest);
+    });
+  }, [heroScroll]);
 
   const { scrollYProgress: owlScroll } = useScroll({
     target: owlContainerRef,
@@ -164,14 +178,14 @@ export default function Home() {
         <Navbar />
 
         {/* Cinematic Hero */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center pt-32 pb-16 overflow-hidden bg-[#030303]">
+        <section ref={heroRef} className="relative min-h-screen flex flex-col items-center justify-center pt-32 pb-16 overflow-hidden bg-[#030303]">
           <ParticleNetwork />
           
           <div className="max-w-7xl mx-auto px-6 z-10 text-center flex flex-col items-center justify-center relative">
             
             {/* Real-time Cinematic particle Owl convergence and neural network canvas */}
             <div className="w-full max-w-5xl mx-auto h-[320px] sm:h-[450px] relative overflow-hidden bg-[#030303]/20 border border-gray-900/40 rounded-3xl p-6 flex items-center justify-center">
-              <OwlCanvas />
+              <OwlCanvas scrollProgress={heroProgress} />
             </div>
 
             {/* Timeless Titles */}

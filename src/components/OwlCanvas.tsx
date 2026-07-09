@@ -14,9 +14,14 @@ interface Particle {
   color: string;
   speed: number;
   angle: number;
+  id: number;
 }
 
-export default function OwlCanvas() {
+interface OwlCanvasProps {
+  scrollProgress?: number; // 0 to 1 based on hero scroll out
+}
+
+export default function OwlCanvas({ scrollProgress = 0 }: OwlCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stage, setStage] = useState(0);
   const mousePos = useRef({ x: 0, y: 0, rx: 0, ry: 0 });
@@ -30,13 +35,18 @@ export default function OwlCanvas() {
     };
     window.addEventListener("mousemove", handleMouseMove);
 
-    // Timeline stages
+    // Timestamps based on specifications:
+    // 0s - 1.5s: particles drift, world map visible, faint neural lines
+    // 1.5s - 3s: particles converge (three phases)
+    // 3s - 5s: owl visible, eyes illuminate, glow spreads, lines expand
+    // 5s - 7s: text and CTAs fade in
     const timers = [
-      setTimeout(() => setStage(1), 1000),  // Stage 1: starfield floats
-      setTimeout(() => setStage(2), 2500),  // Stage 2: converge to Owl
-      setTimeout(() => setStage(3), 5500),  // Stage 3: eyes illuminate
-      setTimeout(() => setStage(4), 7000),  // Stage 4: wing spread
-      setTimeout(() => setStage(5), 9000),  // Stage 5: grow neural paths
+      setTimeout(() => setStage(1), 100),   // Stage 1: Nearly black background, golden particles drift
+      setTimeout(() => setStage(2), 1500),  // Stage 2: Convergence begins (Loose particles)
+      setTimeout(() => setStage(3), 2200),  // Stage 3: Convergence (Recognizable silhouette)
+      setTimeout(() => setStage(4), 3000),  // Stage 4: Fully refined owl & eyes illuminate
+      setTimeout(() => setStage(5), 4000),  // Stage 5: Neural lines expand
+      setTimeout(() => setStage(6), 5000),  // Stage 6: Text & CTAs fade in
     ];
 
     return () => {
@@ -56,9 +66,9 @@ export default function OwlCanvas() {
     let height = (canvas.height = canvas.offsetHeight);
 
     const particles: Particle[] = [];
-    const numParticles = 1400;
+    const numParticles = 1600;
     const centerX = width / 2;
-    const centerY = height / 2 - 20;
+    const centerY = height / 2 - 30;
 
     // Helper: sample points on a line
     const getLinePoints = (x1: number, y1: number, x2: number, y2: number, count: number) => {
@@ -73,32 +83,32 @@ export default function OwlCanvas() {
       return pts;
     };
 
-    // Define the owl shape coordinates
+    // Construct owl coordinate mesh
     const owlShapes = [
-      // Head
-      ...getLinePoints(centerX - 35, centerY - 90, centerX + 35, centerY - 90, 40), // head top
-      ...getLinePoints(centerX - 35, centerY - 90, centerX - 45, centerY - 60, 30), // left ear
-      ...getLinePoints(centerX + 35, centerY - 90, centerX + 45, centerY - 60, 30), // right ear
-      ...getLinePoints(centerX - 45, centerY - 60, centerX - 30, centerY - 40, 20), // left face
-      ...getLinePoints(centerX + 45, centerY - 60, centerX + 30, centerY - 40, 20), // right face
-      ...getLinePoints(centerX - 30, centerY - 40, centerX + 30, centerY - 40, 30), // neck line
+      // Head Top & Ears
+      ...getLinePoints(centerX - 40, centerY - 100, centerX + 40, centerY - 100, 30),
+      ...getLinePoints(centerX - 40, centerY - 100, centerX - 55, centerY - 70, 25),
+      ...getLinePoints(centerX + 40, centerY - 100, centerX + 55, centerY - 70, 25),
+      ...getLinePoints(centerX - 55, centerY - 70, centerX - 40, centerY - 45, 20),
+      ...getLinePoints(centerX + 55, centerY - 70, centerX + 40, centerY - 45, 20),
+      ...getLinePoints(centerX - 40, centerY - 45, centerX + 40, centerY - 45, 30),
 
-      // Torso
-      ...getLinePoints(centerX - 30, centerY - 40, centerX - 35, centerY + 70, 70), // left body
-      ...getLinePoints(centerX + 30, centerY - 40, centerX + 35, centerY + 70, 70), // right body
-      ...getLinePoints(centerX - 35, centerY + 70, centerX, centerY + 100, 40),     // bottom tail left
-      ...getLinePoints(centerX + 35, centerY + 70, centerX, centerY + 100, 40),     // bottom tail right
+      // Torso Outline
+      ...getLinePoints(centerX - 35, centerY - 45, centerX - 40, centerY + 80, 80),
+      ...getLinePoints(centerX + 35, centerY - 45, centerX + 40, centerY + 80, 80),
+      ...getLinePoints(centerX - 40, centerY + 80, centerX, centerY + 115, 40),
+      ...getLinePoints(centerX + 40, centerY + 80, centerX, centerY + 115, 40),
 
-      // Left Wing base
-      ...getLinePoints(centerX - 30, centerY - 40, centerX - 140, centerY - 10, 80), // left wing top curve
-      ...getLinePoints(centerX - 140, centerY - 10, centerX - 35, centerY + 70, 85), // left wing outer curve
+      // Left Wing outline
+      ...getLinePoints(centerX - 40, centerY - 45, centerX - 160, centerY - 10, 90),
+      ...getLinePoints(centerX - 160, centerY - 10, centerX - 40, centerY + 80, 90),
 
-      // Right Wing base
-      ...getLinePoints(centerX + 30, centerY - 40, centerX + 140, centerY - 10, 80), // right wing top curve
-      ...getLinePoints(centerX + 140, centerY - 10, centerX + 35, centerY + 70, 85), // right wing outer curve
+      // Right Wing outline
+      ...getLinePoints(centerX + 40, centerY - 45, centerX + 160, centerY - 10, 90),
+      ...getLinePoints(centerX + 160, centerY - 10, centerX + 40, centerY + 80, 90),
     ];
 
-    // Generate remaining particles as inner filler / feathers
+    // Initialize particles (some gold, mostly white/soft gold highlights)
     for (let i = 0; i < numParticles; i++) {
       const origX = Math.random() * width;
       const origY = Math.random() * height;
@@ -107,14 +117,13 @@ export default function OwlCanvas() {
       let targetY = centerY;
 
       if (i < owlShapes.length) {
-        // Map exactly to outlines
         targetX = owlShapes[i].x;
         targetY = owlShapes[i].y;
       } else {
-        // Map to chest feathers / filler points
-        const randTorsoT = Math.random();
-        targetX = centerX + (Math.random() - 0.5) * 55 * (1 - randTorsoT * 0.4);
-        targetY = centerY - 30 + randTorsoT * 115;
+        // Inner chest feathers / volumetric filler
+        const t = Math.random();
+        targetX = centerX + (Math.random() - 0.5) * 60 * (1 - t * 0.4);
+        targetY = centerY - 35 + t * 120;
       }
 
       particles.push({
@@ -126,152 +135,146 @@ export default function OwlCanvas() {
         targetY,
         size: Math.random() * 1.5 + 0.5,
         alpha: Math.random() * 0.4 + 0.3,
-        color: Math.random() > 0.15 ? "#FFFFFF" : "#C8A34A",
+        color: Math.random() > 0.2 ? "#FFFFFF" : "#C8A34A",
         speed: Math.random() * 0.03 + 0.015,
         angle: Math.random() * Math.PI * 2,
+        id: i,
       });
     }
 
-    // Neural connections target points
-    const neuralNodes = [
-      { x: centerX - 260, y: centerY - 80, active: false, currentX: centerX, currentY: centerY },
-      { x: centerX - 310, y: centerY + 90, active: false, currentX: centerX, currentY: centerY },
-      { x: centerX + 260, y: centerY - 90, active: false, currentX: centerX, currentY: centerY },
-      { x: centerX + 320, y: centerY + 80, active: false, currentX: centerX, currentY: centerY },
-      { x: centerX - 180, y: centerY - 160, active: false, currentX: centerX, currentY: centerY },
-      { x: centerX + 180, y: centerY - 170, active: false, currentX: centerX, currentY: centerY },
+    // Spreading global neural targets
+    const neuralPaths = [
+      { x: centerX - 280, y: centerY - 90, active: false, cx: centerX, cy: centerY },
+      { x: centerX - 330, y: centerY + 100, active: false, cx: centerX, cy: centerY },
+      { x: centerX + 280, y: centerY - 100, active: false, cx: centerX, cy: centerY },
+      { x: centerX + 340, y: centerY + 90, active: false, cx: centerX, cy: centerY },
+      { x: centerX - 200, y: centerY - 180, active: false, cx: centerX, cy: centerY },
     ];
 
-    let wingOffset = 0;
-    let wingDir = 1;
     let time = 0;
 
     const animate = () => {
       time += 0.015;
       ctx.clearRect(0, 0, width, height);
 
-      // Mouse Parallax Offset
-      const dx = (mousePos.current.x - width / 2) * 0.05;
-      const dy = (mousePos.current.y - height / 2) * 0.05;
-      mousePos.current.rx += (dx - mousePos.current.rx) * 0.1;
-      mousePos.current.ry += (dy - mousePos.current.ry) * 0.1;
+      // Mouse Parallax
+      const dx = (mousePos.current.x - width / 2) * 0.03;
+      const dy = (mousePos.current.y - height / 2) * 0.03;
+      mousePos.current.rx += (dx - mousePos.current.rx) * 0.08;
+      mousePos.current.ry += (dy - mousePos.current.ry) * 0.08;
 
-      // 1. Draw faint background global nodes and grid
-      ctx.strokeStyle = "rgba(200, 163, 74, 0.03)";
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.arc(centerX + mousePos.current.rx * 0.3, centerY + mousePos.current.ry * 0.3, 170, 0, Math.PI * 2);
-      ctx.stroke();
+      // Volumetric lighting / Vignette background glow
+      const vignette = ctx.createRadialGradient(centerX, centerY, 50, centerX, centerY, width / 2);
+      vignette.addColorStop(0, "rgba(200, 163, 74, 0.03)");
+      vignette.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, width, height);
 
-      // 2. Animate and draw particles
+      // Faint backing world map grid
+      if (stage >= 1) {
+        ctx.strokeStyle = "rgba(200, 163, 74, 0.015)";
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.arc(centerX + mousePos.current.rx * 0.2, centerY + mousePos.current.ry * 0.2, 180, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Draw and transform particles
       particles.forEach((p, idx) => {
         let tx = p.targetX;
         let ty = p.targetY;
 
-        // Stage 4: wing spread offset modifier
-        if (stage >= 4) {
-          // Identify if particle is part of wings (based on its coordinate offsets)
-          if (tx < centerX - 40) {
-            // Left wing moves outwards
-            tx -= wingOffset * (centerX - 40 - tx) * 0.6;
-          } else if (tx > centerX + 40) {
-            // Right wing moves outwards
-            tx += wingOffset * (tx - centerX - 40) * 0.6;
+        // Slow orbits/constellations backing for loose drift particles
+        if (stage === 1) {
+          p.x += Math.cos(p.angle + time * 0.1) * 0.4;
+          p.y += Math.sin(p.angle + time * 0.1) * 0.4;
+        } else {
+          // Stage 2: Convergence
+          let progressFactor = 1;
+          if (stage === 2) progressFactor = 0.3; // loose particles
+          if (stage === 3) progressFactor = 0.75; // recognizable silhouette
+
+          // Micro breathing idle animation
+          const breatheY = Math.sin(time * 1.5 + idx * 0.02) * 1.0;
+
+          // Timer-based head rotation (every 12 seconds)
+          let headX = 0;
+          const cycle = Math.floor(time / 12) % 2;
+          if (cycle === 0 && ty < centerY - 45) {
+            headX = Math.sin(time * 0.5) * 3.5; // slow look
           }
+
+          // Scroll dissolution: pull down and randomize
+          if (scrollProgress > 0) {
+            ty += scrollProgress * 550;
+            tx += (Math.sin(time + idx) * 120 * scrollProgress);
+            p.alpha = Math.max(0, p.alpha - scrollProgress * 0.01);
+          }
+
+          // Move particles
+          p.x += (tx + headX + dx + (Math.cos(p.angle) * 2 * (1 - progressFactor)) - p.x) * p.speed * progressFactor;
+          p.y += (ty + breatheY + dy - p.y) * p.speed * progressFactor;
         }
 
-        // Apply mouse pointer repulsion
+        // Mouse interaction: push particles
         const mx = mousePos.current.x;
         const my = mousePos.current.y;
-        const distToMouse = Math.hypot(p.x - mx, p.y - my);
-        let repX = 0;
-        let repY = 0;
-        if (distToMouse < 90) {
-          const force = (90 - distToMouse) / 90;
-          const angle = Math.atan2(p.y - my, p.x - mx);
-          repX = Math.cos(angle) * force * 15;
-          repY = Math.sin(angle) * force * 15;
+        const dist = Math.hypot(p.x - mx, p.y - my);
+        if (dist < 80) {
+          const pushForce = (80 - dist) / 80;
+          const pushAngle = Math.atan2(p.y - my, p.x - mx);
+          p.x += Math.cos(pushAngle) * pushForce * 12;
+          p.y += Math.sin(pushAngle) * pushForce * 12;
         }
 
-        // Micro breathing motion
-        const breathe = Math.sin(time + idx * 0.05) * 1.2;
-
-        // Handle convergence stage interpolations
-        if (stage >= 2) {
-          p.x += (tx + repX + dx * 0.8 - p.x) * p.speed;
-          p.y += (ty + repY + dy * 0.8 + breathe - p.y) * p.speed;
-        } else {
-          // Stage 1: random drift floating
-          p.x += Math.cos(p.angle) * 0.2;
-          p.y += Math.sin(p.angle) * 0.2;
-        }
-
-        // Draw particle
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.alpha;
+        ctx.globalAlpha = p.alpha * (1 - scrollProgress);
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // 3. Eyes Glow Animation (Stage 3+)
-      if (stage >= 3) {
-        const eyeGlow = 0.5 + Math.sin(time * 3) * 0.15; // gentle shimmer
+      // 3. Eye Glow Shimmer (Stage 4+)
+      if (stage >= 4) {
+        const eyePulse = 0.65 + Math.sin(time * 3) * 0.15; // slow shimmer
         ctx.shadowColor = "#C8A34A";
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 10;
+
+        ctx.fillStyle = "rgba(200, 163, 74, " + eyePulse + ")";
+        ctx.globalAlpha = (1 - scrollProgress);
 
         // Left eye
-        ctx.fillStyle = "rgba(200, 163, 74, " + eyeGlow + ")";
-        ctx.globalAlpha = 0.9;
         ctx.beginPath();
-        ctx.arc(centerX - 16 + mousePos.current.rx * 0.8, centerY - 65 + mousePos.current.ry * 0.8, 3.5, 0, Math.PI * 2);
+        ctx.arc(centerX - 18 + mousePos.current.rx * 0.7, centerY - 65 + mousePos.current.ry * 0.7, 3, 0, Math.PI * 2);
         ctx.fill();
 
         // Right eye
         ctx.beginPath();
-        ctx.arc(centerX + 16 + mousePos.current.rx * 0.8, centerY - 65 + mousePos.current.ry * 0.8, 3.5, 0, Math.PI * 2);
+        ctx.arc(centerX + 18 + mousePos.current.rx * 0.7, centerY - 65 + mousePos.current.ry * 0.7, 3, 0, Math.PI * 2);
         ctx.fill();
 
-        // Reset shadow
-        ctx.shadowBlur = 0;
+        ctx.shadowBlur = 0; // reset
       }
 
-      // 4. Neural Network grow paths (Stage 5+)
+      // 4. Growing neural lines spread (Stage 5+)
       if (stage >= 5) {
-        neuralNodes.forEach((node) => {
-          // grow coordinates from center outward
-          node.currentX += (node.x + mousePos.current.rx * 0.5 - node.currentX) * 0.06;
-          node.currentY += (node.y + mousePos.current.ry * 0.5 - node.currentY) * 0.06;
+        neuralPaths.forEach((node) => {
+          node.cx += (node.x + mousePos.current.rx * 0.4 - node.cx) * 0.05;
+          node.cy += (node.y + mousePos.current.ry * 0.4 - node.cy) * 0.05;
 
-          // Draw connection path
-          ctx.strokeStyle = "rgba(200, 163, 74, 0.15)";
+          ctx.strokeStyle = "rgba(200, 163, 74, 0.12)";
           ctx.lineWidth = 0.8;
           ctx.beginPath();
-          ctx.moveTo(centerX + mousePos.current.rx * 0.8, centerY - 50 + mousePos.current.ry * 0.8);
-          ctx.lineTo(node.currentX, node.currentY);
+          ctx.moveTo(centerX + mousePos.current.rx * 0.7, centerY - 50 + mousePos.current.ry * 0.7);
+          ctx.lineTo(node.cx, node.cy);
           ctx.stroke();
 
-          // Pulse target nodes
           ctx.fillStyle = "#C8A34A";
-          ctx.globalAlpha = 0.6 + Math.sin(time * 4) * 0.3;
+          ctx.globalAlpha = (0.5 + Math.sin(time * 3) * 0.2) * (1 - scrollProgress);
           ctx.beginPath();
-          ctx.arc(node.currentX, node.currentY, 3.5, 0, Math.PI * 2);
+          ctx.arc(node.cx, node.cy, 3, 0, Math.PI * 2);
           ctx.fill();
         });
-      }
-
-      // Handle graceful wing spread timing limits
-      if (stage >= 4) {
-        if (wingDir === 1) {
-          wingOffset += 0.006;
-          if (wingOffset >= 0.45) wingDir = -1; // stop and return
-        } else {
-          wingOffset -= 0.003;
-          if (wingOffset <= 0.08) {
-            // rest wings at a very micro-breathing level
-            wingOffset = 0.08 + Math.sin(time * 0.8) * 0.015;
-          }
-        }
       }
 
       animationFrameId = requestAnimationFrame(animate);
@@ -290,12 +293,12 @@ export default function OwlCanvas() {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
     };
-  }, [stage]);
+  }, [stage, scrollProgress]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-auto cursor-default transition-opacity duration-[1.5s]"
+      className="absolute inset-0 w-full h-full pointer-events-auto cursor-default transition-opacity duration-500"
       style={{ mixBlendMode: "screen" }}
     />
   );
