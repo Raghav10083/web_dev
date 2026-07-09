@@ -135,8 +135,15 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Motto centerpiece */}
+      <div className="max-w-7xl mx-auto px-6 border-t border-[#C8A34A0A] pt-8 pb-4 text-center">
+        <span className="font-serif text-[#C8A34A] text-sm font-semibold tracking-[0.2em] uppercase block">
+          Wisdom to Imagine. &bull; Courage to Execute. &bull; Excellence to Transform.
+        </span>
+      </div>
+
       {/* Copyright Strip */}
-      <div className="max-w-7xl mx-auto px-6 border-t border-[#C8A34A0A] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-600">
+      <div className="max-w-7xl mx-auto px-6 border-t border-[#C8A34A0A]/50 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-600">
         <span>© {new Date().getFullYear()} White Owls & Black Tigers. All rights reserved.</span>
         <div className="flex gap-6">
           <Link href="#disclaimer" className="hover:text-[#C8A34A] transition-colors">Disclaimer</Link>
